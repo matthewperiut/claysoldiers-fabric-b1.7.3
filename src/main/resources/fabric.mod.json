@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "claysoldiers",
+  "version": "${version}",
+
+  "name": "Clay Soldiers Mod",
+  "description": "Clay Soldiers V3 reimplemented in STAPI",
+  "authors": [
+    "MatthewPeriut",
+    "KodaichiZero"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+
+  "license": "CC0-1.0",
+  "icon": "assets/claysoldiers/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "stationapi:event_bus": [
+      "com.matthewperiut.claysoldiers.ExampleStationMod",
+      "com.matthewperiut.claysoldiers.item.ItemListener",
+      "com.matthewperiut.claysoldiers.recipe.RecipeListener",
+      "com.matthewperiut.claysoldiers.entity.EntityListener"
+    ],
+    "stationapi:event_bus_client": [
+      "com.matthewperiut.claysoldiers.texture.TextureListener"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.13.3",
+    "minecraft": "1.0.0-beta.7.3"
+  },
+  "accessWidener": "claysoldiers.accesswidener",
+  "suggests": {
+    "another-mod": "*"
+  }
+}
