@@ -1,4 +1,4 @@
-package com.matthewperiut.claysoldiers.entity.model;
+package com.matthewperiut.claysoldiers.client.model;
 
 import net.minecraft.client.model.Cuboid;
 import net.minecraft.client.render.entity.model.Biped;
@@ -65,6 +65,7 @@ public class ModelClayMan extends Biped {
 
     public ModelClayMan() {
         this(0.0F);
+
     }
 
     public ModelClayMan(float f) {
@@ -107,10 +108,11 @@ public class ModelClayMan extends Biped {
         field_624.setRotationPoint(-1.0F, 5.0F + f1, 0.0F);
 
         // field_625 is leftLeg
-        field_624 = new Cuboid(0, 7);
-        field_624.mirror = true;
-        field_624.method_1818(-1.0F, 0.0F, -1.0F, 2, 6, 2, f);
-        field_624.setRotationPoint(1.0F, 5.0F + f1, 0.0F);
+        field_625 = new Cuboid(0, 7);
+        field_625.mirror = true;
+        field_625.method_1818(-1.0F, 0.0F, -1.0F, 2, 6, 2, f);
+        field_625.setRotationPoint(1.0F, 5.0F + f1, 0.0F);
+
         this.stick = new Cuboid(31, 11);
         this.stick.method_1818(-0.5F, 3.5F, -4.0F, 1, 1, 3, f);
         this.stick.setRotationPoint(-3.0F, 1.0F + f1, 0.0F);
@@ -176,14 +178,22 @@ public class ModelClayMan extends Biped {
     public void render(float f, float f1, float f2, float f3, float f4, float f5) {
         setRotationAngles(f, f1, f2, f3, f4, f5);
         // method_1815 is render
-        field_619.method_1815(f5);
-        field_620.method_1815(f5);
-        field_621.method_1815(f5);
-        field_622.method_1815(f5);
-        field_623.method_1815(f5);
-        field_624.method_1815(f5);
-        if (this.hasCrown)
-            field_620.method_1815(f5);
+        // head.render
+        this.field_619.method_1815(f5);
+        // body.render
+        this.field_621.method_1815(f5);
+        // rightarm.render
+        this.field_622.method_1815(f5);
+        // leftarm.render
+        this.field_623.method_1815(f5);
+        // rightleg.render
+        this.field_624.method_1815(f5);
+        // leftleg.render
+        this.field_625.method_1815(f5);
+        if (this.hasCrown) {
+            // hat.render
+            this.field_620.method_1815(f5);
+        }
         if (this.hasStick) {
             this.stick.method_1815(f5);
             if (this.isSharpened) {
@@ -219,84 +229,107 @@ public class ModelClayMan extends Biped {
     }
 
     public void setRotationAngles(float f, float f1, float f2, float f3, float f4, float f5) {
-        field_619.yaw = f3 / 57.29578F;
-        field_619.pitch = f4 / 57.29578F;
-        field_620.yaw = field_619.yaw;
-        field_620.pitch = field_619.pitch;
-        field_622.pitch = MathHelper.cos(f * 0.6662F + 3.141593F) * 2.0F * f1 * 0.5F;
-        field_623.pitch = MathHelper.cos(f * 0.6662F) * 2.0F * f1 * 0.5F;
-        field_622.rotationPointY = 0.0F;
-        field_623.rotationPointY = 0.0F;
-        field_624.pitch = MathHelper.cos(f * 0.6662F) * 1.4F * f1;
-        field_624.pitch = MathHelper.cos(f * 0.6662F + 3.141593F) * 1.4F * f1;
-        field_624.yaw = 0.0F;
-        field_624.yaw = 0.0F;
+        this.field_619.yaw = f3 / 57.29578F;
+        this.field_619.pitch = f4 / 57.29578F;
+        this.field_620.yaw = this.field_619.yaw;
+        this.field_620.pitch = this.field_619.pitch;
+        this.field_622.pitch = MathHelper.cos(f * 0.6662F + 3.141593F) * 2.0F * f1 * 0.5F;
+        this.field_623.pitch = MathHelper.cos(f * 0.6662F) * 2.0F * f1 * 0.5F;
+        this.field_622.roll = 0.0F;
+        this.field_623.roll = 0.0F;
+        this.field_624.pitch = MathHelper.cos(f * 0.6662F) * 1.4F * f1;
+        this.field_625.pitch = MathHelper.cos(f * 0.6662F + 3.141593F) * 1.4F * f1;
+        this.field_624.yaw = 0.0F;
+        this.field_625.yaw = 0.0F;
+        Cuboid var10000;
         if (this.isRiding) {
-            field_622.pitch += -0.6283185F;
-            field_623.pitch += -0.6283185F;
-            field_624.pitch = -1.256637F;
-            field_624.pitch = -1.256637F;
-            field_624.yaw = 0.3141593F;
-            field_624.yaw = -0.3141593F;
+            var10000 = this.field_622;
+            var10000.pitch += -0.6283185F;
+            var10000 = this.field_623;
+            var10000.pitch += -0.6283185F;
+            this.field_624.pitch = -1.256637F;
+            this.field_625.pitch = -1.256637F;
+            this.field_624.yaw = 0.3141593F;
+            this.field_625.yaw = -0.3141593F;
         }
-        // field_628 is leftArmPose
-        if (this.field_628)
-            field_623.pitch = field_623.pitch * 0.5F - 0.3141593F;
-        // field_629 is leftArmPose
-        if (this.field_629)
-            field_622.pitch = field_622.pitch * 0.5F - 0.3141593F;
-        field_622.yaw = 0.0F;
-        field_623.yaw = 0.0F;
+
+        if (this.field_628) {
+            this.field_623.pitch = this.field_623.pitch * 0.5F - 0.3141593F;
+        }
+
+        if (this.field_629) {
+            this.field_622.pitch = this.field_622.pitch * 0.5F - 0.3141593F;
+        }
+
+        this.field_622.yaw = 0.0F;
+        this.field_623.yaw = 0.0F;
+        float f6;
+        float f7;
         if (this.handSwingProgress > -9990.0F) {
-            float f6 = this.handSwingProgress;
-            field_621.yaw = MathHelper.sin(MathHelper.sqrt(f6) * 3.141593F * 2.0F) * 0.2F;
-            field_622.yaw += field_621.yaw;
-            field_623.yaw += field_621.yaw;
-            field_623.pitch += field_621.yaw;
+            f6 = this.handSwingProgress;
+            this.field_621.yaw = MathHelper.sin(MathHelper.sqrt(f6) * 3.141593F * 2.0F) * 0.2F;
+            var10000 = this.field_622;
+            var10000.yaw += this.field_621.yaw;
+            var10000 = this.field_623;
+            var10000.yaw += this.field_621.yaw;
+            var10000 = this.field_623;
+            var10000.pitch += this.field_621.yaw;
             f6 = 1.0F - this.handSwingProgress;
             f6 *= f6;
             f6 *= f6;
             f6 = 1.0F - f6;
-            float f7 = MathHelper.sin(f6 * 3.141593F);
-            float f8 = MathHelper.sin(this.handSwingProgress * 3.141593F) * -(field_619.pitch - 0.7F) * 0.75F;
-            field_622.pitch = (float)(field_622.pitch - f7 * 1.2D + f8);
-            field_622.yaw += field_621.yaw * 2.0F;
-            field_622.roll = MathHelper.sin(this.handSwingProgress * 3.141593F) * -0.4F;
+            f7 = MathHelper.sin(f6 * 3.141593F);
+            float f8 = MathHelper.sin(this.handSwingProgress * 3.141593F) * -(this.field_619.pitch - 0.7F) * 0.75F;
+            var10000 = this.field_622;
+            var10000.pitch = (float)((double)var10000.pitch - ((double)f7 * 1.2D + (double)f8));
+            var10000 = this.field_622;
+            var10000.yaw += this.field_621.yaw * 2.0F;
+            this.field_622.roll = MathHelper.sin(this.handSwingProgress * 3.141593F) * -0.4F;
         }
-        field_622.roll += MathHelper.cos(f2 * 0.09F) * 0.05F + 0.05F;
-        field_623.roll -= MathHelper.cos(f2 * 0.09F) * 0.05F + 0.05F;
-        field_622.pitch += MathHelper.sin(f2 * 0.067F) * 0.05F;
-        field_623.pitch -= MathHelper.sin(f2 * 0.067F) * 0.05F;
+
+        var10000 = this.field_622;
+        var10000.roll += MathHelper.cos(f2 * 0.09F) * 0.05F + 0.05F;
+        var10000 = this.field_623;
+        var10000.roll -= MathHelper.cos(f2 * 0.09F) * 0.05F + 0.05F;
+        var10000 = this.field_622;
+        var10000.pitch += MathHelper.sin(f2 * 0.067F) * 0.05F;
+        var10000 = this.field_623;
+        var10000.pitch -= MathHelper.sin(f2 * 0.067F) * 0.05F;
         if (this.isClimbing) {
-            field_622.pitch -= 1.58F;
-            field_623.pitch -= 1.58F;
-            field_624.pitch -= 0.7F;
-            field_624.pitch -= 0.7F;
-            field_619.pitch -= 0.6F;
-            field_620.pitch -= 0.6F;
+            --this.field_622.pitch;
+            --this.field_623.pitch;
+            var10000 = this.field_624;
+            var10000.pitch -= 0.7F;
+            var10000 = this.field_625;
+            var10000.pitch -= 0.7F;
+            var10000 = this.field_620;
+            var10000.pitch -= 0.6F;
+            var10000 = this.field_620;
+            var10000.pitch -= 0.6F;
         } else if (this.hasLogs) {
-            field_622.pitch = 3.141593F;
-            field_623.pitch = 3.141593F;
+            this.field_622.pitch = 3.141593F;
+            this.field_623.pitch = 3.141593F;
         } else if (this.armLeft > 0.0F) {
-            float f6 = -4.0F + this.armLeft * 4.0F;
-            float f7 = 1.0F - this.armLeft;
-            field_623.pitch = f6;
-            field_623.roll = f7;
+            f6 = -4.0F + this.armLeft * 4.0F;
+            f7 = 1.0F - this.armLeft;
+            this.field_623.pitch = f6;
+            this.field_623.roll = f7;
         }
-        this.speckyHead.pitch = field_619.pitch;
-        this.speckyHead.yaw = field_619.yaw;
-        this.speckyBody.yaw = field_621.yaw;
-        this.speckyRightArm.pitch = field_622.pitch;
-        this.speckyRightArm.yaw = field_622.yaw;
-        this.speckyRightArm.roll = field_622.roll;
-        this.speckyLeftArm.pitch = field_623.pitch;
-        this.speckyLeftArm.yaw = field_623.yaw;
-        this.speckyLeftArm.roll = field_623.roll;
-        this.speckyRightLeg.pitch = field_624.pitch;
-        this.speckyRightLeg.yaw = field_624.yaw;
-        this.speckyRightLeg.roll = field_624.roll;
-        this.speckyLeftLeg.pitch = field_624.pitch;
-        this.speckyLeftLeg.yaw = field_624.yaw;
-        this.speckyLeftLeg.roll = field_624.roll;
+
+        this.speckyHead.pitch = this.field_620.pitch;
+        this.speckyHead.yaw = this.field_620.yaw;
+        this.bipedPadding.yaw = this.bipedChest.yaw = this.speckyBody.yaw = this.field_621.yaw;
+        this.stickBlunt.pitch = this.stickSharp.pitch = this.stick.pitch = this.bipedRightPadding.pitch = this.bipedRightArmor.pitch = this.speckyRightArm.pitch = this.field_622.pitch;
+        this.stickBlunt.yaw = this.stickSharp.yaw = this.stick.yaw = this.bipedRightPadding.yaw = this.bipedRightArmor.yaw = this.speckyRightArm.yaw = this.field_622.yaw;
+        this.stickBlunt.roll = this.stickSharp.roll = this.stick.roll = this.bipedRightPadding.roll = this.bipedRightArmor.roll = this.speckyRightArm.roll = this.field_622.roll;
+        this.bipedRock.pitch = this.bipedLeftPadding.pitch = this.bipedLeftArmor.pitch = this.speckyLeftArm.pitch = this.field_623.pitch;
+        this.bipedRock.yaw = this.bipedLeftPadding.yaw = this.bipedLeftArmor.yaw = this.speckyLeftArm.yaw = this.field_623.yaw;
+        this.bipedRock.roll = this.bipedLeftPadding.roll = this.bipedLeftArmor.roll = this.speckyLeftArm.roll = this.field_623.roll;
+        this.speckyRightLeg.pitch = this.field_624.pitch;
+        this.speckyRightLeg.yaw = this.field_624.yaw;
+        this.speckyRightLeg.roll = this.field_624.roll;
+        this.speckyLeftLeg.pitch = this.field_625.pitch;
+        this.speckyLeftLeg.yaw = this.field_625.yaw;
+        this.speckyLeftLeg.roll = this.field_625.roll;
     }
 }

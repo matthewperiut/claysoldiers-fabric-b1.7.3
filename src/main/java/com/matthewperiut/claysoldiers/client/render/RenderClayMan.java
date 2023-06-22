@@ -1,8 +1,8 @@
-package com.matthewperiut.claysoldiers.entity.render;
+package com.matthewperiut.claysoldiers.client.render;
 
 //import com.matthewperiut.claysoldiers.entity.behavior.EntityClayMan;
 import com.matthewperiut.claysoldiers.entity.behavior.EntityClayMan;
-import com.matthewperiut.claysoldiers.entity.model.ModelClayMan;
+import com.matthewperiut.claysoldiers.client.model.ModelClayMan;
 import net.minecraft.client.render.entity.BipedEntityRenderer;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.model.Biped;
@@ -14,7 +14,6 @@ public class RenderClayMan extends BipedEntityRenderer {
 
     public RenderClayMan(Biped model, float f) {
         super(model, f);
-        dispatcher = EntityRenderDispatcher.INSTANCE;
         this.mc1 = (ModelClayMan)model;
     }
 

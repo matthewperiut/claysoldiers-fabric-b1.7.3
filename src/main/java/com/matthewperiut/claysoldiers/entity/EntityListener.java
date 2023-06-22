@@ -1,11 +1,9 @@
 package com.matthewperiut.claysoldiers.entity;
 
 import com.matthewperiut.claysoldiers.entity.behavior.EntityClayMan;
-import com.matthewperiut.claysoldiers.entity.model.ModelClayMan;
-import com.matthewperiut.claysoldiers.entity.render.RenderClayMan;
+import com.matthewperiut.claysoldiers.entity.behavior.EntityDirtHorse;
+import com.matthewperiut.claysoldiers.entity.behavior.EntityGravelChunk;
 import net.mine_diver.unsafeevents.listener.EventListener;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
-import net.modificationstation.stationapi.api.client.event.render.entity.EntityRendererRegisterEvent;
 import net.modificationstation.stationapi.api.event.entity.EntityRegister;
 import net.modificationstation.stationapi.api.event.registry.MobHandlerRegistryEvent;
 import net.modificationstation.stationapi.api.registry.ModID;
@@ -21,7 +19,8 @@ public class EntityListener
     @EventListener
     public void registerEntities(EntityRegister event) {
         event.register(EntityClayMan.class, "claysoldier");
-        EntityRenderDispatcher.INSTANCE.renderers.put(EntityClayMan.class, new RenderClayMan(new ModelClayMan(0.0F, 13.0F), 0.125F));
+        event.register(EntityDirtHorse.class, "dirthorse");
+        event.register(EntityGravelChunk.class, "gravelchunk");
     }
 
     @EventListener

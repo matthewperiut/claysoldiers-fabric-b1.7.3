@@ -10,8 +10,9 @@
     "KodaichiZero"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/1275357-1-0-0-clay-soldiers-classic",
+    "sources": "https://github.com/matthewperiut/claysoldiers-fabric-b1.7.3",
+    "issues": "https://github.com/matthewperiut/claysoldiers-fabric-b1.7.3/issues"
   },
 
   "license": "CC0-1.0",
@@ -20,21 +21,18 @@
   "environment": "*",
   "entrypoints": {
     "stationapi:event_bus": [
-      "com.matthewperiut.claysoldiers.ExampleStationMod",
+      "com.matthewperiut.claysoldiers.ClaySoldiersMod",
       "com.matthewperiut.claysoldiers.item.ItemListener",
       "com.matthewperiut.claysoldiers.recipe.RecipeListener",
       "com.matthewperiut.claysoldiers.entity.EntityListener"
     ],
     "stationapi:event_bus_client": [
-      "com.matthewperiut.claysoldiers.texture.TextureListener"
+      "com.matthewperiut.claysoldiers.texture.TextureListener",
+      "com.matthewperiut.claysoldiers.client.EntityRendererListener"
     ]
   },
   "depends": {
     "fabricloader": ">=0.13.3",
     "minecraft": "1.0.0-beta.7.3"
-  },
-  "accessWidener": "claysoldiers.accesswidener",
-  "suggests": {
-    "another-mod": "*"
   }
 }

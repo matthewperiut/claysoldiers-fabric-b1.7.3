@@ -1,4 +1,4 @@
-package com.matthewperiut.claysoldiers.entity.render;
+package com.matthewperiut.claysoldiers.client.render;
 
 import java.util.Random;
 
@@ -6,13 +6,12 @@ import com.matthewperiut.claysoldiers.entity.behavior.EntityGravelChunk;
 import net.minecraft.block.BlockBase;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.block.BlockRenderer;
+import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.entity.EntityBase;
 import net.minecraft.item.ItemInstance;
 import net.minecraft.util.maths.MathHelper;
-import net.modificationstation.stationapi.api.block.BlockState;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.RenderTexture;
 
 public class RenderGravelChunk extends EntityRenderer {
     private BlockRenderer renderBlocks = new BlockRenderer();
@@ -22,7 +21,7 @@ public class RenderGravelChunk extends EntityRenderer {
         // shadow size
         this.field_2678 = 0.0F;
 
-        // ???
+        // size
         this.field_2679 = 0.75F;
     }
 

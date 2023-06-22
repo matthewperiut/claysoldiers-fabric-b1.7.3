@@ -17,6 +17,11 @@ public class ItemClayMan extends TemplateItemBase {
         this.maxStackSize = 16;
     }
 
+    protected void spawnEntity(Level world, double x, double y, double z)
+    {
+        EntityClayMan ec = new EntityClayMan(world, x, y, z, this.clayTeam);
+        world.spawnEntity(ec);
+    }
 
     public boolean useOnTile(ItemInstance itemstack, PlayerBase entityplayer, Level world, int i, int j, int k, int l) {
         if (world.getTileId(i, j, k) != BlockBase.SNOW.id) {
@@ -57,8 +62,7 @@ public class ItemClayMan extends TemplateItemBase {
                 double a = (double)i + 0.25D + (double)rand.nextFloat() * 0.5D;
                 double b = (double)j + 0.5D;
                 double c = (double)k + 0.25D + (double)rand.nextFloat() * 0.5D;
-                EntityClayMan ec = new EntityClayMan(world, a, b, c, this.clayTeam);
-                world.spawnEntity(ec);
+                spawnEntity(world, a, b, c);
                 jack = true;
                 --itemstack.count;
             }

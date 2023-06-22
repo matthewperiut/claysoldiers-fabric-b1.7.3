@@ -1,5 +1,6 @@
 package com.matthewperiut.claysoldiers.entity.behavior;
 
+import com.matthewperiut.claysoldiers.ClaySoldiersMod;
 import com.matthewperiut.claysoldiers.item.ItemClayMan;
 import com.matthewperiut.claysoldiers.item.ItemListener;
 import net.minecraft.block.BlockBase;
@@ -16,7 +17,6 @@ import net.minecraft.tileentity.TileEntityBase;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.io.CompoundTag;
 import net.minecraft.util.maths.MathHelper;
-import net.modificationstation.stationapi.api.registry.Identifier;
 import net.modificationstation.stationapi.api.server.entity.HasTrackingParameters;
 
 import java.util.List;
@@ -94,7 +94,7 @@ public class EntityClayMan extends AnimalBase {
     }
 
     public String clayManTexture(int i) {
-        String joe = "assets/claysoldiers/textures/entities/clay";
+        String joe = "claysoldiers:textures/entities/clay";
         if (i == 0) {
             joe = joe + "Grey";
         } else if (i == 1) {
@@ -149,6 +149,7 @@ public class EntityClayMan extends AnimalBase {
     @Override
     public void tickHandSwing() {
         //mcp updatePlayerActionState
+
         super.tickHandSwing();
         if (this.strikeTime > 0) {
             --this.strikeTime;
@@ -196,9 +197,8 @@ public class EntityClayMan extends AnimalBase {
             --this.throwTime;
         }
 
-        /* todo: return to goo time nonsense
-        int j;
         if (this.gooTime > 0) {
+            int j;
             //mcp -> bin : motion -> velocity
             this.velocityX = 0.0D;
             this.velocityY = 0.0D;
@@ -215,11 +215,11 @@ public class EntityClayMan extends AnimalBase {
             j = MathHelper.floor(this.boundingBox.minY - 1.0D);
             int k = MathHelper.floor(this.z);
 
-            j = this.worldObj.getBlockId(i, j, k);
-            if (j > 0 && j < 128 && (j == 0 || Block.blocksList[j].getCollisionBoundingBoxFromPool(this.worldObj, i, j, k) == null)) {
+            j = this.level.getTileId(i, j, k);
+            if (j > 0 && j < 128 && (j == 0 || BlockBase.BY_ID[j].getCollisionShape(this.level, i, j, k) == null)) {
                 this.gooTime = 0;
             }
-        }*/
+        }
 
         if (this.throwTime > 6)
         {
@@ -229,6 +229,17 @@ public class EntityClayMan extends AnimalBase {
         ++this.entCount;
         // mcp this.playerToAttack -> this.entity
         // mcp isDead -> removed
+        if (this.entity instanceof EntityClayMan)
+        {
+            EntityClayMan e = (EntityClayMan) this.entity;
+            if (this.clayTeam == e.clayTeam)
+            {
+                this.entity = null;
+
+                this.setTarget((class_61)null);
+            }
+        }
+
         if (this.entity != null && this.entity.removed) {
             this.entity = null;
             // mcp setPathToEntity -> setTarget
@@ -256,9 +267,12 @@ public class EntityClayMan extends AnimalBase {
             List list = this.level.getEntities(this, this.boundingBox.expand(8.0D, 5.0D, 8.0D));
 
             EntityClayMan ec;
-            for(int j = 0; j < list.size(); ++j) {
+            for(int j = 0; j < list.size(); ++j)
+            {
                 EntityBase entity = (EntityBase)list.get(j);
-                if (entity instanceof EntityClayMan && this.rand.nextInt(3) == 0 && this.method_928(entity)) {
+                // method_928 is something like this entity can see them
+                if (entity instanceof EntityClayMan && this.rand.nextInt(3) == 0 && this.method_928(entity))
+                {
                     EntityClayMan clayman = (EntityClayMan)entity;
                     if (clayman.health > 0 && clayman.clayTeam != this.clayTeam && this.clayTeam > 0 && this.logs <= 0) {
                         if (clayman.king) {
@@ -268,38 +282,32 @@ public class EntityClayMan extends AnimalBase {
                             }
 
                             ec = (EntityClayMan)this.entity;
-                            if (!ec.king) {
-                                this.entity = clayman;
-                                break;
-                            }
-                        } else if (this.entity == null) {
-                            this.entity = clayman;
-                            break;
-                        }
-                    } else if (clayman.health > 0 && this.targetFollow == null && this.entity == null && clayman.king && clayman.clayTeam == this.clayTeam && (double)this.distanceTo(clayman) > 3.0D) {
-                        this.targetFollow = clayman;
+                    if (!ec.king) {
+                        this.entity = clayman;
                         break;
                     }
-                } else if (this.entity == null && entity instanceof WalkingBase && this.method_928(entity)) {
-                    WalkingBase mob = (WalkingBase)entity;
-                    if (mob.method_634() != null)
-                    {
-                        this.entity = mob;
-                        break;
-                    }
-                } else {
-                    // ridingEntity -> vehicle
-                    if (this.entity == null && this.targetFollow == null && !this.heavyCore && this.logs <= 0 && this.vehicle == null && entity instanceof EntityDirtHorse && entity.passenger == null && this.method_928(entity)) {
-                        this.targetFollow = entity;
-                        break;
-                    }
+                } else if (this.entity == null) {
+                    this.entity = clayman;
+                    break;
+                }
+            }
+        } else if (this.entity == null && this.targetFollow == null && this.vehicle == null && entity instanceof EntityDirtHorse && entity.passenger == null && this.method_928(entity)) {
+            this.targetFollow = entity;
+            break;
+        } else if (this.entity == null && entity instanceof WalkingBase && this.method_928(entity)) {
+            WalkingBase mob = (WalkingBase)entity;
+            if (mob.method_634() != null)
+            {
+                this.entity = mob;
+                break;
+            }
+        } else {
+            if (this.entity == null && this.targetFollow == null && entity instanceof FishHook && this.method_928(entity)) {
+                this.targetFollow = entity;
+                break;
+            }
 
-                    if (this.entity == null && this.targetFollow == null && entity instanceof FishHook && this.method_928(entity)) {
-                        this.targetFollow = entity;
-                        break;
-                    }
-
-                    if (this.entity == null && (this.targetFollow == null || this.targetFollow instanceof EntityClayMan) && entity instanceof Item && this.method_928(entity)) {
+            if ((this.targetFollow == null || this.targetFollow instanceof EntityClayMan) && entity instanceof Item && this.method_928(entity)) {
                         Item item = (Item)entity;
                         if (item.item != null) {
                             ItemInstance stack = item.item;
@@ -457,7 +465,7 @@ public class EntityClayMan extends AnimalBase {
                             } else if (stack.itemId == BlockBase.GRAVEL.id) {
                                 this.rocks = 15;
                                 this.gotcha((Item) this.targetFollow);
-                            } else if (stack.itemId == ItemBase.goldIngot.id) {
+                            } else if (stack.itemId == ItemBase.glowstoneDust.id) {
                                 this.glowing = true;
                                 this.gotcha((Item) this.targetFollow);
                             } else if (stack.itemId == ItemBase.goldIngot.id) {
@@ -1681,5 +1689,35 @@ public class EntityClayMan extends AnimalBase {
             }
 
         }
+    }
+
+    // scope needed for horse
+    public boolean isJumping()
+    {
+        return jumping;
+    }
+    public void setJumping(boolean j)
+    {
+        jumping = j;
+    }
+
+    public float getMoveForward()
+    {
+        return field_1029;
+    }
+
+    public float getMoveStrafe()
+    {
+        return field_1060;
+    }
+
+    public float getFallDistance()
+    {
+        return fallDistance;
+    }
+
+    public void setFallDistance(float f)
+    {
+        fallDistance = f;
     }
 }
