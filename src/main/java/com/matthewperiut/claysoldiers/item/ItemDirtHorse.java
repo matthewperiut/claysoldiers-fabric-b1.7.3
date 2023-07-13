@@ -1,10 +1,8 @@
 package com.matthewperiut.claysoldiers.item;
 
-import com.matthewperiut.claysoldiers.entity.behavior.EntityClayMan;
 import com.matthewperiut.claysoldiers.entity.behavior.EntityDirtHorse;
 import net.minecraft.level.Level;
 import net.modificationstation.stationapi.api.registry.Identifier;
-import net.modificationstation.stationapi.api.template.item.TemplateItemBase;
 
 public class ItemDirtHorse extends ItemClayMan
 {
@@ -18,6 +16,7 @@ public class ItemDirtHorse extends ItemClayMan
     protected void spawnEntity(Level world, double x, double y, double z)
     {
         EntityDirtHorse ec = new EntityDirtHorse(world, x, y, z);
+        world.playSound(x, y, z, "step.gravel", 0.8F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F) * 0.9F);
         world.spawnEntity(ec);
     }
 }

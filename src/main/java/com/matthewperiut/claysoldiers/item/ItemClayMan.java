@@ -20,6 +20,7 @@ public class ItemClayMan extends TemplateItemBase {
     protected void spawnEntity(Level world, double x, double y, double z)
     {
         EntityClayMan ec = new EntityClayMan(world, x, y, z, this.clayTeam);
+        world.playSound(x, y, z, "step.gravel", 0.8F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F) * 0.9F);
         world.spawnEntity(ec);
     }
 
@@ -58,13 +59,15 @@ public class ItemClayMan extends TemplateItemBase {
         int p = world.getTileId(i, j, k);
         if (p == 0 || BlockBase.BY_ID[p].getCollisionShape(world, i, j, k) == null)
         {
-            while(itemstack.count > 0) {
-                double a = (double)i + 0.25D + (double)rand.nextFloat() * 0.5D;
-                double b = (double)j + 0.5D;
-                double c = (double)k + 0.25D + (double)rand.nextFloat() * 0.5D;
-                spawnEntity(world, a, b, c);
-                jack = true;
-                --itemstack.count;
+            if (!world.isServerSide) {
+                while (itemstack.count > 0) {
+                    double a = (double) i + 0.25D + (double) rand.nextFloat() * 0.5D;
+                    double b = (double) j + 0.5D;
+                    double c = (double) k + 0.25D + (double) rand.nextFloat() * 0.5D;
+                    spawnEntity(world, a, b, c);
+                    jack = true;
+                    --itemstack.count;
+                }
             }
         }
 

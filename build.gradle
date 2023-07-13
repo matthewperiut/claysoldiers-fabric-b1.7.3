@@ -38,8 +38,11 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.projectlombok:lombok:1.18.26'
-    implementation 'org.projectlombok:lombok:1.18.26'
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    testCompileOnly 'org.projectlombok:lombok:1.18.24'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
+
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.glasslauncher:bin:${project.yarn_mappings}"
     modImplementation "babric:fabric-loader:${project.loader_version}"
@@ -51,10 +54,11 @@ dependencies {
     modLocalRuntime("com.github.calmilamsy:ModMenu:${project.modmenu_version}") {
         transitive false
     }
+    implementation "blue.endless:jankson:1.2.1"
     modLocalRuntime("net.glasslauncher.mods:GlassConfigAPI:${project.gcapi_version}") {
         transitive false
     }
-    modLocalRuntime("net.glasslauncher:HowManyItems-Fabric-Unofficial:5.0.12") {
+    modLocalRuntime("net.glasslauncher:HowManyItems-Fabric-Unofficial:${project.hmi_version}") {
         transitive false
     }
 }

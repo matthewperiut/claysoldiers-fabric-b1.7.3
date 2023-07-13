@@ -1,5 +1,6 @@
 package com.matthewperiut.claysoldiers.entity.behavior;
 
+import lombok.Getter;
 import net.minecraft.block.BlockBase;
 import net.minecraft.entity.EntityBase;
 import net.minecraft.entity.Living;
@@ -12,10 +13,17 @@ import net.minecraft.util.io.CompoundTag;
 import net.minecraft.util.maths.Box;
 import net.minecraft.util.maths.MathHelper;
 import net.minecraft.util.maths.Vec3f;
+import net.modificationstation.stationapi.api.registry.Identifier;
+import net.modificationstation.stationapi.api.server.entity.HasTrackingParameters;
+import net.modificationstation.stationapi.api.server.entity.MobSpawnDataProvider;
 
 import java.util.List;
 
-public class EntityGravelChunk extends EntityBase {
+import static com.matthewperiut.claysoldiers.ClaySoldiersMod.MODID;
+import static net.modificationstation.stationapi.api.registry.Identifier.of;
+
+@HasTrackingParameters(trackingDistance = 160, updatePeriod = 2)
+public class EntityGravelChunk extends EntityBase implements MobSpawnDataProvider {
     private int xTile = -1;
     private int yTile = -1;
     private int zTile = -1;
@@ -311,7 +319,6 @@ public class EntityGravelChunk extends EntityBase {
                 entityplayer.onItemPickup(this, 1);
                 this.remove();
             }
-
         }
     }
 
@@ -320,4 +327,7 @@ public class EntityGravelChunk extends EntityBase {
         // get shadow size?
         return 0.0F;
     }
+
+    @Getter
+    private final Identifier handlerIdentifier = of(MODID, "gravelchunk");
 }

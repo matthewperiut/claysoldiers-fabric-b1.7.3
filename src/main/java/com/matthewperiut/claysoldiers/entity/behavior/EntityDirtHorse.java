@@ -1,6 +1,7 @@
 package com.matthewperiut.claysoldiers.entity.behavior;
 
 import com.matthewperiut.claysoldiers.item.ItemListener;
+import lombok.Getter;
 import net.minecraft.entity.EntityBase;
 import net.minecraft.entity.Living;
 import net.minecraft.entity.animal.AnimalBase;
@@ -8,10 +9,17 @@ import net.minecraft.item.ItemBase;
 import net.minecraft.level.Level;
 import net.minecraft.util.io.CompoundTag;
 import net.minecraft.util.maths.MathHelper;
+import net.modificationstation.stationapi.api.registry.Identifier;
+import net.modificationstation.stationapi.api.server.entity.HasTrackingParameters;
+import net.modificationstation.stationapi.api.server.entity.MobSpawnDataProvider;
 
 import java.util.List;
 
-public class EntityDirtHorse extends AnimalBase {
+import static com.matthewperiut.claysoldiers.ClaySoldiersMod.MODID;
+import static net.modificationstation.stationapi.api.registry.Identifier.of;
+
+@HasTrackingParameters(trackingDistance = 160, updatePeriod = 2)
+public class EntityDirtHorse extends AnimalBase implements MobSpawnDataProvider {
     public boolean gotRider;
 
     public EntityDirtHorse(Level world) {
@@ -165,4 +173,7 @@ public class EntityDirtHorse extends AnimalBase {
     public boolean isOnLadder() {
         return false;
     }
+
+    @Getter
+    private final Identifier handlerIdentifier = of(MODID, "dirthorse");
 }

@@ -6,9 +6,7 @@ import net.modificationstation.stationapi.api.event.registry.ItemRegistryEvent;
 import net.modificationstation.stationapi.api.mod.entrypoint.Entrypoint;
 import net.modificationstation.stationapi.api.registry.Identifier;
 import net.modificationstation.stationapi.api.registry.ModID;
-import net.modificationstation.stationapi.api.template.item.TemplateItemBase;
 import net.modificationstation.stationapi.api.util.Null;
-import net.modificationstation.stationapi.impl.entity.player.PlayerAPI;
 
 public class ItemListener
 {

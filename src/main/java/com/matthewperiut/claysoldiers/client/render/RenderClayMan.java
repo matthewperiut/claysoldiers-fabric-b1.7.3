@@ -1,10 +1,10 @@
 package com.matthewperiut.claysoldiers.client.render;
 
 //import com.matthewperiut.claysoldiers.entity.behavior.EntityClayMan;
-import com.matthewperiut.claysoldiers.entity.behavior.EntityClayMan;
+
 import com.matthewperiut.claysoldiers.client.model.ModelClayMan;
+import com.matthewperiut.claysoldiers.entity.behavior.EntityClayMan;
 import net.minecraft.client.render.entity.BipedEntityRenderer;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.model.Biped;
 import net.minecraft.entity.Living;
 import org.lwjgl.opengl.GL11;
@@ -23,8 +23,8 @@ public class RenderClayMan extends BipedEntityRenderer {
     {
         EntityClayMan c1 = (EntityClayMan)entityliving;
         this.mc1.hasStick = c1.hasStick();
-        this.mc1.hasSpecks = c1.hasSpecks();
-        this.mc1.hasArmor = c1.hasArmor();
+        this.mc1.hasGunpowder = c1.isGunpowdered();
+        this.mc1.hasArmour = c1.hasArmour();
         this.mc1.hasCrown = c1.hasCrown();
         this.mc1.isPadded = c1.isPadded();
         this.mc1.isSharpened = c1.isSharpened();

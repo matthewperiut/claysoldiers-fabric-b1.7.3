@@ -45,11 +45,11 @@ public class ModelClayMan extends Biped {
 
     public boolean hasStick;
 
-    public boolean hasArmor;
+    public boolean hasArmour;
 
     public boolean hasCrown;
 
-    public boolean hasSpecks;
+    public boolean hasGunpowder;
 
     public boolean isClimbing;
 
@@ -202,7 +202,7 @@ public class ModelClayMan extends Biped {
                 this.stickBlunt.method_1815(f5);
             }
         }
-        if (this.hasArmor) {
+        if (this.hasArmour) {
             this.bipedChest.method_1815(f5);
             this.bipedRightArmor.method_1815(f5);
             this.bipedLeftArmor.method_1815(f5);
@@ -212,7 +212,7 @@ public class ModelClayMan extends Biped {
                 this.bipedLeftPadding.method_1815(f5);
             }
         }
-        if (this.hasSpecks) {
+        if (this.hasGunpowder) {
             this.speckyHead.method_1815(f5);
             this.speckyBody.method_1815(f5);
             this.speckyRightArm.method_1815(f5);

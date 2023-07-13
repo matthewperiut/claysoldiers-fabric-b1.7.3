@@ -1,6 +1,5 @@
 package com.matthewperiut.claysoldiers.client.render;
 
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.model.EntityModelBase;
 import net.minecraft.entity.Living;

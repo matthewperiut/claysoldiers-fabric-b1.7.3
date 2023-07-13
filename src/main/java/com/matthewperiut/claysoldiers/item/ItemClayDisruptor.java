@@ -24,26 +24,10 @@ public class ItemClayDisruptor extends TemplateItemBase {
     public boolean shouldRotateAroundWhenRendering() {
         return true;
     }
-    static long l = System.currentTimeMillis() / 1000;
     public ItemInstance use(ItemInstance itemstack, Level world, PlayerBase entityplayer) {
-
-        // using time instead of shoving a counter to tick
-        long now = System.currentTimeMillis() / 1000;
-        if (now - l > 127)
+        if (itemstack.cooldown == 0)
         {
-            // prep for multiplayer when stapi updates ONE DAY
-            for(Object p : world.players)
-            {
-                ((PlayerBase) p).unusedByte = 0;
-            }
-            l = now;
-        }
-
-        // wait 2 seconds
-        if (entityplayer.unusedByte + 1 < now - l)
-        {
-            entityplayer.unusedByte = (byte) (now - l);
-            itemstack.applyDamage(1, entityplayer);
+            boolean used = false;
             List list1 = world.getEntities(entityplayer, entityplayer.boundingBox.expand(16.0D, 16.0D, 16.0D));
 
             int x;
@@ -51,8 +35,10 @@ public class ItemClayDisruptor extends TemplateItemBase {
                 EntityBase entity1 = (EntityBase)list1.get(x);
                 if (entity1 instanceof EntityClayMan && !entity1.removed && ((Living)entity1).health > 0) {
                     entity1.damage(entityplayer, 100);
+                    used = true;
                 } else if (entity1 instanceof EntityDirtHorse && !entity1.removed && ((Living)entity1).health > 0) {
                     entity1.damage(entityplayer, 100);
+                    used = true;
                 }
             }
 
@@ -73,22 +59,17 @@ public class ItemClayDisruptor extends TemplateItemBase {
                             c = (double)k;
                             if (Math.sqrt(a * a + b * b + c * c) <= 12.0D) {
                                 this.blockCrush(world, x + i, y + j, z + k);
+                                used = true;
                             }
                         }
                     }
                 }
             }
 
-            for(i = 0; i < 128; ++i) {
-                double angle = (double)i / 3.0D;
-                a = 0.5D + (double)i / 6.0D;
-                b = Math.sin(angle) * 0.25D;
-                c = Math.cos(angle) * 0.25D;
-                double d = entityplayer.x + b * a;
-                double e = entityplayer.boundingBox.minY + 0.5D;
-                double f = entityplayer.z + c * a;
-
-                world.addParticle("portal", d, e, f, e, 0.0D, f);
+            if (used)
+            {
+                itemstack.applyDamage(1, entityplayer);
+                itemstack.cooldown = 10;
             }
         }
 
@@ -99,10 +80,10 @@ public class ItemClayDisruptor extends TemplateItemBase {
         int a = worldObj.getTileId(x, y, z);
         int b = worldObj.getTileMeta(x, y, z);
         if (a != 0) {
-            //ModLoader.getMinecraftInstance().effectRenderer.addBlockDestroyEffects(x, y, z, a, b);
             BlockBase.BY_ID[a].onBlockRemoved(worldObj, x, y, z);
+            worldObj.playSound(x,y,z, "step.gravel", 0.8F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F) * 0.9F);
             BlockBase.BY_ID[a].drop(worldObj, x, y, z, b);
-            worldObj.setTileInChunk(x, y, z, 0);
+            worldObj.setTile(x, y, z, 0);
         }
     }
 }

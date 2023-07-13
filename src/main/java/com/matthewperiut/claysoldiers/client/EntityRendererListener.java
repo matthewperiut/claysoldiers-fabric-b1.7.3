@@ -9,9 +9,7 @@ import com.matthewperiut.claysoldiers.entity.behavior.EntityClayMan;
 import com.matthewperiut.claysoldiers.entity.behavior.EntityDirtHorse;
 import com.matthewperiut.claysoldiers.entity.behavior.EntityGravelChunk;
 import net.mine_diver.unsafeevents.listener.EventListener;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.modificationstation.stationapi.api.client.event.render.entity.EntityRendererRegisterEvent;
-import net.modificationstation.stationapi.api.event.entity.EntityRegister;
 
 public class EntityRendererListener
 {
