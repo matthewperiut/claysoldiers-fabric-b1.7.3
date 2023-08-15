@@ -1,7 +1,6 @@
 package com.matthewperiut.claysoldiers.entity.behavior;
 
 import com.matthewperiut.claysoldiers.item.ItemListener;
-import lombok.Getter;
 import net.minecraft.entity.EntityBase;
 import net.minecraft.entity.Living;
 import net.minecraft.entity.animal.AnimalBase;
@@ -174,6 +173,8 @@ public class EntityDirtHorse extends AnimalBase implements MobSpawnDataProvider 
         return false;
     }
 
-    @Getter
-    private final Identifier handlerIdentifier = of(MODID, "dirthorse");
+    @Override
+    public Identifier getHandlerIdentifier() {
+        return of(MODID, "dirthorse");
+    }
 }

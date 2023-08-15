@@ -2,7 +2,6 @@ package com.matthewperiut.claysoldiers.entity.behavior;
 
 import com.matthewperiut.claysoldiers.item.ItemClayMan;
 import com.matthewperiut.claysoldiers.item.ItemListener;
-import lombok.Getter;
 import net.minecraft.block.BlockBase;
 import net.minecraft.block.material.Material;
 import net.minecraft.class_61;
@@ -50,9 +49,14 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
     public EntityBase killedByPlayer;
 
     public EntityClayMan(Level world) {
+        this(world, 0);
+    }
+
+    public EntityClayMan(Level world, int team)
+    {
         super(world);
         this.health = 20;
-        this.clayTeam = 0;
+        this.clayTeam = team;
         //mcp yOffset
         this.standingEyeHeight = 0.0F;
         //mcp stepHeight
@@ -62,7 +66,7 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
         this.setSize(0.15F, 0.4F);
         //mcp posX posY posZ
         this.setPosition(this.x, this.y, this.z);
-        this.texture = this.clayManTexture(0);
+        this.texture = this.clayManTexture(team);
         //mcp renderDistanceWeight
         this.renderDistanceMultiplier = 5.0D;
     }
@@ -1745,8 +1749,10 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
         fallDistance = f;
     }
 
-    @Getter
-    private final Identifier handlerIdentifier = of(MODID, "claysoldier");
+    @Override
+    public Identifier getHandlerIdentifier() {
+        return of(MODID, "claysoldier");
+    }
 
     @Override
     public void writeToMessage(Message message)
