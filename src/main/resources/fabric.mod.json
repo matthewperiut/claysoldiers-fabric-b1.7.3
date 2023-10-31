@@ -2,7 +2,6 @@
   "schemaVersion": 1,
   "id": "claysoldiers",
   "version": "${version}",
-
   "name": "Clay Soldiers Mod",
   "description": "Clay Soldiers V3 reimplemented in STAPI",
   "authors": [
@@ -14,10 +13,8 @@
     "sources": "https://github.com/matthewperiut/claysoldiers-fabric-b1.7.3",
     "issues": "https://github.com/matthewperiut/claysoldiers-fabric-b1.7.3/issues"
   },
-
   "license": "CC0-1.0",
   "icon": "assets/claysoldiers/icon.png",
-
   "environment": "*",
   "entrypoints": {
     "stationapi:event_bus": [

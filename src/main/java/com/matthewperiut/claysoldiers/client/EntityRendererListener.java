@@ -11,11 +11,9 @@ import com.matthewperiut.claysoldiers.entity.behavior.EntityGravelChunk;
 import net.mine_diver.unsafeevents.listener.EventListener;
 import net.modificationstation.stationapi.api.client.event.render.entity.EntityRendererRegisterEvent;
 
-public class EntityRendererListener
-{
+public class EntityRendererListener {
     @EventListener
-    public void registerEntityRenderers(EntityRendererRegisterEvent event)
-    {
+    public void registerEntityRenderers(EntityRendererRegisterEvent event) {
         event.renderers.put(EntityClayMan.class, new RenderClayMan(new ModelClayMan(0.0F, 13.0F), 0.125F));
         event.renderers.put(EntityDirtHorse.class, new RenderDirtHorse(new ModelDirtHorse(0.0F, 12.75F), 0.15F));
         event.renderers.put(EntityGravelChunk.class, new RenderGravelChunk());

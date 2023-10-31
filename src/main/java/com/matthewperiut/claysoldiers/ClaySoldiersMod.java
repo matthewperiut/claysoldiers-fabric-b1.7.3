@@ -21,12 +21,10 @@ public class ClaySoldiersMod {
     public static final ModID MODID = Null.get();
 
     @EventListener
-    public void init(InitEvent event)
-    {
-        ClaySoldiersMod.LOGGER.info("Is this working? " + MODID.toString());
+    public void init(InitEvent event) {
+        ClaySoldiersMod.LOGGER.info("Is this working? " + MODID);
 
-        if (FabricLoader.getInstance().isModLoaded("spc"))
-        {
+        if (FabricLoader.getInstance().isModLoaded("spc")) {
             SPCSupport.addEntities();
         }
     }

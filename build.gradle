@@ -17,6 +17,10 @@ loom {
 
 repositories {
     maven {
+        name = 'Froge'
+        url = 'https://maven.minecraftforge.net/'
+    }
+    maven {
         name = 'Babric'
         url = 'https://maven.glass-launcher.net/babric'
     }
@@ -29,11 +33,28 @@ repositories {
         url = 'https://maven.glass-launcher.net/releases'
     }
     maven {
-        name = "Jitpack"
-        url "https://jitpack.io/"
+        name = 'Jitpack'
+        url = 'https://jitpack.io/'
+    }
+    mavenCentral()
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
     }
     maven {
-        url 'https://maven.minecraftforge.net/'
+        name 'Legacy Fabric'
+        url "https://repo.legacyfabric.net/repository/legacyfabric/"
+        content {
+            includeGroup 'net.legacyfabric'
+            includeGroup 'net.legacyfabric.legacy-fabric-api'
+        }
     }
 }
 
@@ -44,14 +65,14 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
 
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.glasslauncher:bin:${project.yarn_mappings}"
+    mappings "net.legacyfabric:beta-yarn:b1.7.3+build.4"
     modImplementation "babric:fabric-loader:${project.loader_version}"
 
     implementation "org.slf4j:slf4j-api:1.8.0-beta4"
     implementation "org.apache.logging.log4j:log4j-slf4j18-impl:2.16.0"
     modImplementation("net.modificationstation:StationAPI:${project.stapi_version}")
 
-    modImplementation('com.github.matthewperiut:spc-babric:0.1.2') {
+    modImplementation("com.github.matthewperiut:spc-babric:${project.spc_version}") {
         transitive false
     }
 

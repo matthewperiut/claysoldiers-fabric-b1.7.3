@@ -2,20 +2,20 @@ package com.matthewperiut.claysoldiers.entity.behavior;
 
 import com.matthewperiut.claysoldiers.item.ItemClayMan;
 import com.matthewperiut.claysoldiers.item.ItemListener;
-import net.minecraft.block.BlockBase;
+import com.matthewperiut.claysoldiers.util.ClientUtil;
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.class_61;
 import net.minecraft.entity.*;
-import net.minecraft.entity.animal.AnimalBase;
-import net.minecraft.entity.player.PlayerBase;
-import net.minecraft.item.ItemBase;
-import net.minecraft.item.ItemInstance;
-import net.minecraft.item.food.FoodBase;
-import net.minecraft.level.Level;
-import net.minecraft.tileentity.TileEntityBase;
-import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.entity.ai.pathing.EntityPath;
+import net.minecraft.entity.block.ChestBlockEntity;
+import net.minecraft.entity.monster.MonsterEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.food.FoodItem;
 import net.minecraft.util.io.CompoundTag;
-import net.minecraft.util.maths.MathHelper;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 import net.modificationstation.stationapi.api.packet.Message;
 import net.modificationstation.stationapi.api.registry.Identifier;
 import net.modificationstation.stationapi.api.server.entity.HasTrackingParameters;
@@ -28,127 +28,64 @@ import static com.matthewperiut.claysoldiers.ClaySoldiersMod.MODID;
 import static net.modificationstation.stationapi.api.registry.Identifier.of;
 
 @HasTrackingParameters(trackingDistance = 160, updatePeriod = 2)
-public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
+public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataProvider {
     public int clayTeam;
+    public int weaponPoints;
+    public int armorPoints;
     public int foodLeft;
     public int sugarTime;
     public int resPoints;
     public int entCount;
     public int strikeTime;
     public int climbTime;
+    public int gooTime;
     public int smokeTime;
     public int gooStock;
     public int smokeStock;
+    public int logs;
+    public int rocks;
     public int blockX;
     public int blockY;
     public int blockZ;
     public int throwTime;
     public float swingLeft;
+    public boolean gunpowdered;
+    public boolean king;
+    public boolean glowing;
+    public boolean isSwinging;
+    public boolean stickSharp;
+    public boolean armorPadded;
     public boolean heavyCore;
-    public EntityBase targetFollow;
-    public EntityBase killedByPlayer;
+    public boolean isSwingingLeft;
+    public Entity targetFollow;
+    public Entity killedByPlayer;
 
-    public EntityClayMan(Level world) {
-        this(world, 0);
-    }
-
-    public EntityClayMan(Level world, int team)
-    {
+    public EntityClayMan(World world) {
         super(world);
         this.health = 20;
-        this.clayTeam = team;
-        //mcp yOffset
+        this.clayTeam = 0;
         this.standingEyeHeight = 0.0F;
-        //mcp stepHeight
         this.field_1641 = 0.1F;
-        //mcp moveSpeed
         this.movementSpeed = 0.3F;
         this.setSize(0.15F, 0.4F);
-        //mcp posX posY posZ
         this.setPosition(this.x, this.y, this.z);
-        this.texture = this.clayManTexture(team);
-        //mcp renderDistanceWeight
-        this.renderDistanceMultiplier = 5.0D;
+        this.texture = this.clayManTexture(0);
+        this.renderDistanceMultiplier = 5.0;
     }
 
-    public EntityClayMan(Level world, double x, double y, double z, int i) {
+    public EntityClayMan(World world, double x, double y, double z, int i) {
         super(world);
         this.health = 20;
         this.clayTeam = i;
-        //mcp yOffset
         this.standingEyeHeight = 0.0F;
-        //mcp stepHeight
         this.field_1641 = 0.1F;
-        //mcp moveSpeed
         this.movementSpeed = 0.3F;
         this.setSize(0.15F, 0.4F);
         this.setPosition(x, y, z);
         this.texture = this.clayManTexture(i);
-        //mcp renderDistanceWeight
-        this.renderDistanceMultiplier = 5.0D;
-        //this.level.playSound(this, "step.gravel", 0.8F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F) * 0.9F);
+        this.renderDistanceMultiplier = 5.0;
+        this.world.playSound(this, "step.gravel", 0.8F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F) * 0.9F);
     }
-
-    protected void initDataTracker() {
-        super.initDataTracker();
-        this.dataTracker.startTracking(16, (int)0); // weapon points
-        this.dataTracker.startTracking(17, (byte)0); // gunpowdered
-        this.dataTracker.startTracking(18, (int)0); // armour points
-        this.dataTracker.startTracking(19, (byte)0); // king
-        this.dataTracker.startTracking(20, (byte)0); // glowing
-        this.dataTracker.startTracking(21, (byte)0); // sharpened
-        this.dataTracker.startTracking(22, (byte)0); // padded
-        this.dataTracker.startTracking(23, (int)0); // gooTime
-        this.dataTracker.startTracking(24, (int)0); // logs
-        this.dataTracker.startTracking(25, (int)0); // rocks
-        this.dataTracker.startTracking(26, (byte)0); // swingarm
-        this.dataTracker.startTracking(27, (byte)0); // leftswingarm
-    }
-
-    public void setTrackedBoolean(int i, boolean bl)
-    {
-        if (bl) {
-            this.dataTracker.setInt(i, (byte)1);
-        } else {
-            this.dataTracker.setInt(i, (byte)0);
-        }
-    }
-
-    public int getWeaponPoints() { return (this.dataTracker.getInt(16)); }
-    public void setWeaponPoints(int i) { this.dataTracker.setInt(16, i); }
-    public boolean hasStick() { return getWeaponPoints() > 0; }
-    public boolean isGunpowdered() { return (this.dataTracker.getByte(17) & 1) != 0; }
-    public void setGunpowdered(boolean bl) { setTrackedBoolean(17, bl); }
-    public int getArmourPoints() { return (this.dataTracker.getInt(18)); }
-    public void setArmourPoints(int i) { this.dataTracker.setInt(18, i); }
-    public boolean hasArmour() { return getArmourPoints() > 0; }
-    public boolean hasCrown() { return (this.dataTracker.getByte(19) & 1) != 0; }
-    public void setCrowned(boolean bl) { setTrackedBoolean(19, bl); }
-    public boolean isGlowing() { return (this.dataTracker.getByte(20) & 1) != 0; }
-    public void setGlowing(boolean bl) { setTrackedBoolean(20, bl); }
-    public boolean isSharpened() { return (this.dataTracker.getByte(21) & 1) != 0; }
-    public void setSharpened(boolean bl) { setTrackedBoolean(21, bl); }
-    public boolean isPadded() { return (this.dataTracker.getByte(22) & 1) != 0; }
-    public void setPadded(boolean bl) { setTrackedBoolean(22, bl); }
-
-    public int getGooTime() { return (this.dataTracker.getInt(23)); }
-    public void setGooTime(int i) { this.dataTracker.setInt(23, i); }
-    public boolean isGooey() { return getGooTime() > 0; }
-    public int getLogs() { return (this.dataTracker.getInt(24)); }
-    public void setLogs(int i) { this.dataTracker.setInt(24, i); }
-    public boolean hasLogs() {
-        return getLogs() > 0;
-    }
-    public int getRocks() { return (this.dataTracker.getInt(25)); }
-    public void setRocks(int i) { this.dataTracker.setInt(25, i); }
-    public boolean hasRocks() {
-        return getRocks() > 0 && getLogs() <= 0; //todo: && this.throwTime <= 0
-    }
-    public boolean isSwinging() { return (this.dataTracker.getByte(26) & 1) != 0; }
-    public void setSwinging(boolean bl) { setTrackedBoolean(26, bl); }
-    public boolean isLeftSwinging() { return (this.dataTracker.getByte(27) & 1) != 0; }
-    public void setLeftSwinging(boolean bl) { setTrackedBoolean(27, bl); }
-
 
     public String clayManTexture(int i) {
         String joe = "claysoldiers:textures/entities/clay";
@@ -205,40 +142,10 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
 
     @Override
     public void tickHandSwing() {
-        //mcp updatePlayerActionState
-
         super.tickHandSwing();
         if (this.strikeTime > 0) {
             --this.strikeTime;
         }
-
-        // NOTE: this.entity = (mcp) playerToAttack
-
-        if (isSwinging()) {
-            this.lastHandSwingProgress += 0.15F;
-            this.handSwingProgress += 0.15F;
-            if (this.lastHandSwingProgress > 1.0F || this.handSwingProgress > 1.0F) {
-                setSwinging(false);
-                this.lastHandSwingProgress = 0.0F;
-                this.handSwingProgress = 0.0F;
-            }
-        }
-
-        if (isLeftSwinging()) {
-            this.swingLeft += 0.15F;
-            if (this.swingLeft > 1.0F) {
-                setLeftSwinging(false);
-                this.swingLeft = 0.0F;
-            }
-        }
-    }
-
-    @Override
-    public void baseTick() {
-        super.baseTick();
-
-        if (this.level.isServerSide)
-            return;
 
         if (this.sugarTime > 0) {
             this.movementSpeed = 0.6F + (this.entity == null && this.targetFollow == null ? 0.0F : 0.15F);
@@ -247,9 +154,7 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
             this.movementSpeed = 0.3F + (this.entity == null && this.targetFollow == null ? 0.0F : 0.15F);
         }
 
-        // mcp handleWaterMovement
-        if (this.isTouchingWater()) {
-            // mcp isJumping
+        if (this.method_1393()) {
             this.jumping = true;
         }
 
@@ -257,12 +162,11 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
         double frogman;
         double aaa;
         if (this.foodLeft > 0 && this.health <= 15 && this.health > 0) {
-            for(i = 0; i < 12; ++i) {
-                frogman = this.x + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                double b = this.y + 0.25D + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                aaa = this.z + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                // todo: implement effect renderer when stapi gets that? maybe it already exists?
-                //ModLoader.getMinecraftInstance().effectRenderer.addEffect(new EntitySlimeFX(this.worldObj, frogman, b, a, Item.porkRaw));
+            for (i = 0; i < 12; ++i) {
+                frogman = this.x + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                double b = this.y + 0.25 + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                aaa = this.z + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                ClientUtil.addPoofParticle(this.world, frogman, b, aaa, Item.RAW_PORKCHOP);
             }
 
             this.health += 15;
@@ -281,92 +185,65 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
             --this.throwTime;
         }
 
-        if (getGooTime() > 0) {
+        if (this.gooTime > 0) {
             int j;
-            //mcp -> bin : motion -> velocity
-            this.velocityX = 0.0D;
-            this.velocityY = 0.0D;
-            this.velocityZ = 0.0D;
-            // mcp "moveForward"
-            this.field_1029 = 0.0F;
-            // mcp "moveStrafing"
-            this.field_1060 = 0.0F;
-            // mcp isJumping
+            this.xVelocity = 0.0;
+            this.yVelocity = 0.0;
+            this.zVelocity = 0.0;
+            this.forwardVelocity = 0.0F;
+            this.horizontalVelocity = 0.0F;
             this.jumping = false;
             this.movementSpeed = 0.0F;
-            setGooTime(getGooTime() - 1);
+            --this.gooTime;
             i = MathHelper.floor(this.x);
-            j = MathHelper.floor(this.boundingBox.minY - 1.0D);
+            j = MathHelper.floor(this.boundingBox.minY - 1.0);
             int k = MathHelper.floor(this.z);
-
-            j = this.level.getTileId(i, j, k);
-            if (j > 0 && j < 128 && (j == 0 || BlockBase.BY_ID[j].getCollisionShape(this.level, i, j, k) == null)) {
-                setGooTime(0);
+            j = this.world.getBlockId(i, j, k);
+            if (j > 0 && j < 128 && (j == 0 || Block.BY_ID[j].getCollisionShape(this.world, i, j, k) == null)) {
+                this.gooTime = 0;
             }
         }
 
-        if (this.throwTime > 6)
-        {
+        if (this.throwTime > 6) {
             this.movementSpeed = -this.movementSpeed;
         }
 
         ++this.entCount;
-        // mcp this.playerToAttack -> this.entity
-        // mcp isDead -> removed
-        if (this.entity instanceof EntityClayMan)
-        {
-            EntityClayMan e = (EntityClayMan) this.entity;
-            if (this.clayTeam == e.clayTeam)
-            {
-                this.entity = null;
-
-                this.setTarget((class_61)null);
-            }
-        }
-
         if (this.entity != null && this.entity.removed) {
             this.entity = null;
-            // mcp setPathToEntity -> setTarget
-            // mcp PathEntity -> class_61
-            this.setTarget((class_61)null);
-            //getDistanceToEntity -> distanceTo
-            //canEntityBeSeen -> method_928
-        } else if (this.entity != null && this.rand.nextInt(25) == 0 && ((double)this.distanceTo(this.entity) > 8.0D || !this.method_928(this.entity))) {
+            this.setTarget(null);
+        } else if (this.entity != null && this.rand.nextInt(25) == 0 && ((double) this.distanceTo(this.entity) > 8.0 || !this.method_928(this.entity))) {
             this.entity = null;
-            this.setTarget((class_61)null);
+            this.setTarget(null);
         }
 
         if (this.targetFollow != null && this.targetFollow.removed) {
             this.targetFollow = null;
-            this.setTarget((class_61)null);
-        } else if (this.targetFollow != null && this.rand.nextInt(25) == 0 && ((double)this.distanceTo(this.targetFollow) > 8.0D || !this.method_928(this.targetFollow))) {
+            this.setTarget(null);
+        } else if (this.targetFollow != null && this.rand.nextInt(25) == 0 && ((double) this.distanceTo(this.targetFollow) > 8.0 || !this.method_928(this.targetFollow))) {
             this.targetFollow = null;
-            this.setTarget((class_61)null);
+            this.setTarget(null);
         }
 
         if (this.smokeTime <= 0 && this.entCount > 2 + this.rand.nextInt(2) && this.health > 0) {
             this.entCount = 0;
-
-            //List list = this.level.getEntities(this, this.boundingBox.expand(8.0D, 5.0D, 8.0D));
-            List list = this.level.getEntities(this, this.boundingBox.expand(8.0D, 5.0D, 8.0D));
+            List list = this.world.getEntities(this, this.boundingBox.expand(8.0, 5.0, 8.0));
 
             EntityClayMan ec;
-            for(int j = 0; j < list.size(); ++j)
-            {
-                EntityBase entity = (EntityBase)list.get(j);
+            for (int j = 0; j < list.size(); ++j) {
+                Entity entity = (Entity) list.get(j);
                 // method_928 is something like this entity can see them
-                if (entity instanceof EntityClayMan && this.rand.nextInt(3) == 0 && this.method_928(entity))
-                {
-                    EntityClayMan clayman = (EntityClayMan)entity;
-                    if (clayman.health > 0 && clayman.clayTeam != this.clayTeam && this.clayTeam > 0 && getLogs() <= 0) {
-                        if (hasCrown()) {
+                if (entity instanceof EntityClayMan && this.rand.nextInt(3) == 0 && this.method_928(entity)) {
+                    EntityClayMan clayman = (EntityClayMan) entity;
+                    if (clayman.health > 0 && clayman.clayTeam != this.clayTeam && this.clayTeam > 0 && this.logs <= 0) {
+                        if (clayman.king) {
                             if (this.entity == null || !(this.entity instanceof EntityClayMan)) {
                                 this.entity = clayman;
                                 break;
                             }
 
-                            ec = (EntityClayMan)this.entity;
-                            if (!ec.hasCrown()) {
+                            ec = (EntityClayMan) this.entity;
+                            if (!ec.king) {
                                 this.entity = clayman;
                                 break;
                             }
@@ -374,57 +251,58 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
                             this.entity = clayman;
                             break;
                         }
+                    } else if (clayman.health > 0 && this.targetFollow == null && this.entity == null && clayman.king && clayman.clayTeam == this.clayTeam && (double) this.distanceTo(clayman) > 3.0) {
+                        this.targetFollow = clayman;
+                        break;
                     }
-                } else if (this.entity == null && this.targetFollow == null && this.vehicle == null && entity instanceof EntityDirtHorse && entity.passenger == null && this.method_928(entity)) {
-                    this.targetFollow = entity;
-                    break;
-                } else if (this.entity == null && entity instanceof WalkingBase && this.method_928(entity)) {
-                    WalkingBase mob = (WalkingBase)entity;
-                    if (mob.method_634() != null)
-                    {
+                } else if (this.entity == null && entity instanceof MonsterEntity mob && this.method_928(entity)) {
+                    if (mob.method_634() != null) {
                         this.entity = mob;
                         break;
                     }
                 } else {
-                    if (this.entity == null && this.targetFollow == null && entity instanceof FishHook && this.method_928(entity)) {
+                    if (this.entity == null && this.targetFollow == null && !this.heavyCore && this.logs <= 0 && this.vehicle == null && entity instanceof EntityDirtHorse && entity.passenger == null && this.method_928(entity)) {
                         this.targetFollow = entity;
                         break;
                     }
 
-                    if ((this.targetFollow == null || this.targetFollow instanceof EntityClayMan) && entity instanceof Item && this.method_928(entity)) {
-                        Item item = (Item)entity;
-                        if (item.item != null) {
-                            ItemInstance stack = item.item;
+                    if (this.entity == null && this.targetFollow == null && entity instanceof FishHookEntity && this.method_928(entity)) {
+                        this.targetFollow = entity;
+                        break;
+                    }
+
+                    if (this.entity == null && (this.targetFollow == null || this.targetFollow instanceof EntityClayMan) && entity instanceof ItemEntity item && this.method_928(entity)) {
+                        if (item.stack != null) {
+                            ItemStack stack = item.stack;
                             if (stack.count > 0) {
-                                if (getWeaponPoints() <= 0 && stack.itemId == ItemBase.stick.id) {
+                                if (this.weaponPoints <= 0 && stack.itemId == Item.STICK.id) {
                                     this.targetFollow = item;
                                     break;
                                 }
 
-                                if (getArmourPoints() <= 0 && stack.itemId == ItemBase.leather.id) {
+                                if (this.armorPoints <= 0 && stack.itemId == Item.LEATHER.id) {
                                     this.targetFollow = item;
                                     break;
                                 }
 
-                                if (getRocks() <= 0 && stack.itemId == BlockBase.GRAVEL.id) {
+                                if (this.rocks <= 0 && stack.itemId == Block.GRAVEL.id) {
                                     this.targetFollow = item;
                                     break;
                                 }
 
-                                if (!isGlowing() && stack.itemId == ItemBase.glowstoneDust.id) {
+                                if (!this.glowing && stack.itemId == Item.GLOWSTONE_DUST.id) {
                                     this.targetFollow = item;
                                     break;
                                 }
 
-                                if (!hasCrown() && stack.itemId == ItemBase.goldIngot.id) {
+                                if (!this.king && stack.itemId == Item.GOLD_INGOT.id) {
                                     boolean jack = false;
-                                    List list2 = this.level.getEntities(this, this.boundingBox.expand(24.0D, 16.0D, 24.0D));
+                                    List list2 = this.world.getEntities(this, this.boundingBox.expand(24.0, 16.0, 24.0));
 
-                                    for(int k = 0; k < list2.size(); ++k) {
-                                        EntityBase entity2 = (EntityBase) list2.get(k);
-                                        if (entity2 instanceof EntityClayMan) {
-                                            EntityClayMan clayman = (EntityClayMan)entity2;
-                                            if (clayman.clayTeam == this.clayTeam && hasCrown()) {
+                                    for (int k = 0; k < list2.size(); ++k) {
+                                        Entity entity2 = (Entity) list2.get(k);
+                                        if (entity2 instanceof EntityClayMan clayman) {
+                                            if (clayman.clayTeam == this.clayTeam && clayman.king) {
                                                 jack = true;
                                                 break;
                                             }
@@ -436,66 +314,65 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
                                         break;
                                     }
                                 } else {
-                                    if (!isGunpowdered() && stack.itemId == ItemBase.gunpowder.id) {
+                                    if (!this.gunpowdered && stack.itemId == Item.GUNPOWDER.id) {
                                         this.targetFollow = item;
                                         break;
                                     }
 
-                                    if (this.sugarTime <= 0 && stack.itemId == ItemBase.sugar.id) {
+                                    if (this.sugarTime <= 0 && stack.itemId == Item.SUGAR.id) {
                                         this.targetFollow = item;
                                         break;
                                     }
 
-                                    if (this.foodLeft <= 0 && stack.getType() != null && stack.getType() instanceof FoodBase) {
+                                    if (this.foodLeft <= 0 && stack.getItem() != null && stack.getItem() instanceof FoodItem) {
                                         this.targetFollow = item;
                                         break;
                                     }
 
-                                    if (this.resPoints <= 0 && stack.itemId == ItemBase.clay.id) {
+                                    if (this.resPoints <= 0 && stack.itemId == Item.CLAY.id) {
                                         this.targetFollow = item;
                                         break;
                                     }
 
-                                    if (this.gooStock <= 0 && stack.itemId == ItemBase.slimeball.id) {
+                                    if (this.gooStock <= 0 && stack.itemId == Item.SLIMEBALL.id) {
                                         this.targetFollow = item;
                                         break;
                                     }
 
-                                    if (this.smokeStock <= 0 && stack.itemId == ItemBase.redstoneDust.id) {
+                                    if (this.smokeStock <= 0 && stack.itemId == Item.REDSTONE_DUST.id) {
                                         this.targetFollow = item;
                                         break;
                                     }
 
-                                    if (getWeaponPoints() > 0 && !isSharpened() && stack.itemId == ItemBase.flint.id) {
+                                    if (this.weaponPoints > 0 && !this.stickSharp && stack.itemId == Item.FLINT.id) {
                                         this.targetFollow = item;
                                         break;
                                     }
 
-                                    if (getArmourPoints() > 0 && !isPadded() && stack.itemId == BlockBase.WOOL.id) {
+                                    if (this.armorPoints > 0 && !this.armorPadded && stack.itemId == Block.WOOL.id) {
                                         this.targetFollow = item;
                                         break;
                                     }
 
-                                    if (!this.heavyCore && this.vehicle == null && stack.itemId == ItemBase.ironIngot.id) {
+                                    if (!this.heavyCore && this.vehicle == null && stack.itemId == Item.IRON_INGOT.id) {
                                         this.targetFollow = item;
                                         break;
                                     }
 
-                                    if (this.resPoints > 0 && stack.getType() != null && stack.getType() instanceof ItemClayMan) {
-                                        ItemClayMan ic = (ItemClayMan)stack.getType();
+                                    if (this.resPoints > 0 && stack.getItem() != null && stack.getItem() instanceof ItemClayMan ic) {
                                         if (ic.clayTeam == this.clayTeam) {
                                             this.targetFollow = item;
                                             break;
                                         }
                                     } else {
-                                        if (stack.itemId == ItemBase.dyePowder.id && stack.getDamage() == this.teamDye(this.clayTeam)) {
+                                        if (stack.itemId == Item.DYE_POWDER.id && stack.getMeta() == this.teamDye(this.clayTeam)) {
                                             this.targetFollow = item;
                                             break;
                                         }
 
-                                        if (stack.itemId == BlockBase.WOOD.id && this.vehicle == null) {
+                                        if (stack.itemId == Block.LOG.id && this.vehicle == null) {
                                             int gottam = 0;
-                                            if (getLogs() < 20 && stack.count >= 5) {
+                                            if (this.logs < 20 && stack.count >= 5) {
                                                 gottam = 1;
                                             }
 
@@ -513,54 +390,50 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
             }
 
             if (this.entity != null) {
-                if (this.strikeTime <= 0 && this.method_928(this.entity) && (double)this.distanceTo(this.entity) < (getWeaponPoints() > 0 ? 1.0D : 0.7D) + (double)this.rand.nextFloat() * 0.1D) {
+                if (this.strikeTime <= 0 && this.method_928(this.entity) && (double) this.distanceTo(this.entity) < (this.weaponPoints > 0 ? 1.0 : 0.7) + (double) this.rand.nextFloat() * 0.1) {
                     if (this.hitTargetMakesDead(this.entity)) {
                         this.entity = null;
-                        this.setTarget((class_61)null);
+                        this.setTarget(null);
                     }
-                } else if (getRocks() > 0 && this.throwTime <= 0 && this.method_928(this.entity)) {
-                    frogman = (double)this.distanceTo(this.entity);
-                    if (frogman >= 1.75D && frogman <= 7.0D) {
-                        setRocks(getRocks()-1);
+                } else if (this.rocks > 0 && this.throwTime <= 0 && this.method_928(this.entity)) {
+                    frogman = this.distanceTo(this.entity);
+                    if (frogman >= 1.75 && frogman <= 7.0) {
+                        --this.rocks;
                         this.throwTime = 20;
                         this.throwRockAtEnemy(this.entity);
                     }
                 }
             } else if (this.targetFollow != null) {
-                // mcp hasPath is method_633
                 if (!this.method_633() || this.rand.nextInt(10) == 0) {
-                    // mcp getPathToEntity -> method_192
-                    this.setTarget(this.level.method_192(this.targetFollow, this, 16.0F));
+                    this.setTarget(this.world.findPathTo(this.targetFollow, this, 16.0F));
                 }
 
-                if (this.targetFollow instanceof Item) {
-                    Item item = (Item)this.targetFollow;
-                    if (item.item != null && this.method_928(item) && (double)this.distanceTo(item) < 0.75D) {
-                        ItemInstance stack = item.item;
+                if (this.targetFollow instanceof ItemEntity item) {
+                    if (item.stack != null && this.method_928(item) && (double) this.distanceTo(item) < 0.75) {
+                        ItemStack stack = item.stack;
                         if (stack.count > 0) {
-                            if (stack.itemId == ItemBase.stick.id) {
-                                setWeaponPoints(15);
-                                setSharpened(false);
-                                this.gotcha((Item)this.targetFollow);
-                            } else if (stack.itemId == ItemBase.leather.id) {
-                                setArmourPoints(15);
-                                setPadded(false);
-                                this.gotcha((Item) this.targetFollow);
-                            } else if (stack.itemId == BlockBase.GRAVEL.id) {
-                                setRocks(15);
-                                this.gotcha((Item) this.targetFollow);
-                            } else if (stack.itemId == ItemBase.glowstoneDust.id) {
-                                setGlowing(true);
-                                this.gotcha((Item) this.targetFollow);
-                            } else if (stack.itemId == ItemBase.goldIngot.id) {
+                            if (stack.itemId == Item.STICK.id) {
+                                this.weaponPoints = 15;
+                                this.stickSharp = false;
+                                this.gotcha((ItemEntity) this.targetFollow);
+                            } else if (stack.itemId == Item.LEATHER.id) {
+                                this.armorPoints = 15;
+                                this.armorPadded = false;
+                                this.gotcha((ItemEntity) this.targetFollow);
+                            } else if (stack.itemId == Block.GRAVEL.id) {
+                                this.rocks = 15;
+                                this.gotcha((ItemEntity) this.targetFollow);
+                            } else if (stack.itemId == Item.GLOWSTONE_DUST.id) {
+                                this.glowing = true;
+                                this.gotcha((ItemEntity) this.targetFollow);
+                            } else if (stack.itemId == Item.GOLD_INGOT.id) {
                                 boolean jack = false;
-                                List list2 = this.level.getEntities(this, this.boundingBox.expand(24.0D, 16.0D, 24.0D));
+                                List list2 = this.world.getEntities(this, this.boundingBox.expand(24.0, 16.0, 24.0));
 
-                                for(int k = 0; k < list2.size(); ++k) {
-                                    EntityBase entity2 = (EntityBase)list2.get(k);
-                                    if (entity2 instanceof EntityClayMan) {
-                                        EntityClayMan clayman = (EntityClayMan)entity2;
-                                        if (clayman.clayTeam == this.clayTeam && hasCrown()) {
+                                for (int gottam = 0; gottam < list2.size(); ++gottam) {
+                                    Entity entity2 = (Entity) list2.get(gottam);
+                                    if (entity2 instanceof EntityClayMan clayman) {
+                                        if (clayman.clayTeam == this.clayTeam && clayman.king) {
                                             jack = true;
                                             break;
                                         }
@@ -568,72 +441,72 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
                                 }
 
                                 if (!jack) {
-                                    setCrowned(true);
-                                    this.gotcha((Item) this.targetFollow);
+                                    this.king = true;
+                                    this.gotcha((ItemEntity) this.targetFollow);
                                     item.remove();
                                 } else {
                                     this.targetFollow = null;
-                                    this.setTarget((class_61)null);
+                                    this.setTarget(null);
                                 }
-                            } else if (stack.itemId == ItemBase.gunpowder.id) {
-                                setGunpowdered(true);
-                                this.gotcha((Item) this.targetFollow);
-                            } else if (stack.itemId == ItemBase.sugar.id) {
+                            } else if (stack.itemId == Item.GUNPOWDER.id) {
+                                this.gunpowdered = true;
+                                this.gotcha((ItemEntity) this.targetFollow);
+                            } else if (stack.itemId == Item.SUGAR.id) {
                                 this.sugarTime = 1200;
-                                this.gotcha((Item)this.targetFollow);
-                            } else if (stack.getType() != null && stack.getType() instanceof FoodBase) {
+                                this.gotcha((ItemEntity) this.targetFollow);
+                            } else if (stack.getItem() != null && stack.getItem() instanceof FoodItem) {
                                 this.foodLeft = 4;
-                                this.gotcha((Item)this.targetFollow);
-                            } else if (stack.itemId == ItemBase.clay.id) {
+                                this.gotcha((ItemEntity) this.targetFollow);
+                            } else if (stack.itemId == Item.CLAY.id) {
                                 this.resPoints = 4;
-                                this.gotcha((Item)this.targetFollow);
-                            } else if (stack.itemId == ItemBase.redstoneDust.id) {
+                                this.gotcha((ItemEntity) this.targetFollow);
+                            } else if (stack.itemId == Item.REDSTONE_DUST.id) {
                                 this.smokeStock = 2;
-                                this.gotcha((Item)this.targetFollow);
-                            } else if (stack.itemId == ItemBase.slimeball.id) {
+                                this.gotcha((ItemEntity) this.targetFollow);
+                            } else if (stack.itemId == Item.SLIMEBALL.id) {
                                 this.gooStock = 2;
-                                this.gotcha((Item)this.targetFollow);
-                            } else if (stack.itemId == ItemBase.ironIngot.id) {
+                                this.gotcha((ItemEntity) this.targetFollow);
+                            } else if (stack.itemId == Item.IRON_INGOT.id) {
                                 this.heavyCore = true;
-                                this.gotcha((Item)this.targetFollow);
+                                this.gotcha((ItemEntity) this.targetFollow);
                             } else {
                                 double a;
                                 double b;
                                 double c;
-                                if (stack.itemId == ItemBase.flint.id) {
-                                    if (getWeaponPoints() > 0) {
-                                        setSharpened(true);
+                                if (stack.itemId == Item.FLINT.id) {
+                                    if (this.weaponPoints > 0) {
+                                        this.stickSharp = true;
 
-                                        for(int j = 0; j < 4; ++j) {
-                                            a = this.x + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                                            b = this.boundingBox.minY + 0.125D + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.25D;
-                                            c = this.z + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                                            //ModLoader.getMinecraftInstance().effectRenderer.addEffect(new EntityDiggingFX(this.worldObj, a, b, c, 0.0D, 0.0D, 0.0D, Block.planks, 0, 0));
+                                        for (int j = 0; j < 4; ++j) {
+                                            a = this.x + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                                            b = this.boundingBox.minY + 0.125 + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.25;
+                                            c = this.z + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                                            ClientUtil.addDiggingParticle(this.world, a, b, c, 0.0, 0.0, 0.0, Block.WOOD, 0, 0);
                                         }
 
-                                        this.level.playSound(this, "random.wood click", 0.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+                                        this.world.playSound(this, "random.wood click", 0.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
                                     }
 
                                     this.targetFollow = null;
-                                } else if (stack.itemId == BlockBase.WOOL.id) {
-                                    if (getArmourPoints() > 0) {
-                                        setPadded(true);
+                                } else if (stack.itemId == Block.WOOL.id) {
+                                    if (this.armorPoints > 0) {
+                                        this.armorPadded = true;
 
-                                        for(int j = 0; j < 4; ++j) {
-                                            a = this.x + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                                            b = this.boundingBox.minY + 0.125D + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.25D;
-                                            c = this.z + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                                            //ModLoader.getMinecraftInstance().effectRenderer.addEffect(new EntityDiggingFX(this.worldObj, a, b, c, 0.0D, 0.0D, 0.0D, Block.cloth, 0, 0));
+                                        for (int j = 0; j < 4; ++j) {
+                                            a = this.x + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                                            b = this.boundingBox.minY + 0.125 + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.25;
+                                            c = this.z + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                                            ClientUtil.addDiggingParticle(this.world, a, b, c, 0.0, 0.0, 0.0, Block.WOOL, 0, 0);
                                         }
 
-                                        this.level.playSound(this, "step.cloth", 0.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+                                        this.world.playSound(this, "step.cloth", 0.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
                                     }
 
                                     this.targetFollow = null;
-                                } else if (stack.getType() != null && stack.getType() instanceof ItemClayMan) {
+                                } else if (stack.getItem() != null && stack.getItem() instanceof ItemClayMan) {
                                     this.swingArm();
-                                    this.level.playSound(item, "step.gravel", 0.8F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F) * 0.9F);
-                                    ItemBase item1 = ItemListener.greyDoll.asItem();
+                                    this.world.playSound(item, "step.gravel", 0.8F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F) * 0.9F);
+                                    Item item1 = ItemListener.greyDoll.asItem();
                                     if (this.clayTeam == 1) {
                                         item1 = ItemListener.redDoll.asItem();
                                     } else if (this.clayTeam == 2) {
@@ -648,66 +521,85 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
                                         item1 = ItemListener.purpleDoll.asItem();
                                     }
 
-                                    for(int q = 0; q < 18; ++q) {
-                                        //a = this.x + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                                        //double b = this.y + 0.25D + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                                        //double c = this.z + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                                        //ModLoader.getMinecraftInstance().effectRenderer.addEffect(new EntitySlimeFX(this.worldObj, a, b, c, item1));
-                                    }
+                                    // todo:
+                                    //for(int q = 0; q < 18; ++q) {
+                                    //a = this.x + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
+                                    //double b = this.y + 0.25D + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
+                                    //double c = this.z + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
+                                    //ModLoader.getMinecraftInstance().effectRenderer.addEffect(new EntitySlimeFX(this.worldObj, a, b, c, item1));
+                                    //}
 
-                                    ec = new EntityClayMan(level, item.x, item.y, item.z, this.clayTeam);
-                                    this.level.spawnEntity(ec);
-                                    this.gotcha((Item) this.targetFollow);
+                                    ec = new EntityClayMan(this.world, item.x, item.y, item.z, this.clayTeam);
+                                    this.world.spawnEntity(ec);
+                                    this.gotcha((ItemEntity) this.targetFollow);
                                     --this.resPoints;
-                                } else if (stack.itemId == BlockBase.LOG.id && this.vehicle == null) {
+                                } else if (stack.itemId == Block.LOG.id && this.vehicle == null) {
                                     int gottam = 0;
-                                    if (getLogs() < 20 && stack.count >= 5) {
+                                    if (this.logs < 20 && stack.count >= 5) {
                                         gottam = 1;
                                     }
 
                                     if (gottam > 0) {
-                                        this.level.playSound(this, "random.pop", 0.2F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+                                        this.world.playSound(this, "random.pop", 0.2F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
                                         if (gottam == 1) {
-                                            setLogs(getLogs() + 5);
-                                            if (item.item != null) {
-                                                ItemInstance var10000 = item.item;
+                                            this.logs += 5;
+                                            if (item.stack != null) {
+                                                ItemStack var10000 = item.stack;
                                                 var10000.count -= 5;
                                             }
                                         }
 
-                                        if (item.item == null || item.item.count <= 0) {
+                                        if (item.stack == null || item.stack.count <= 0) {
                                             item.remove();
                                         }
                                     }
 
-                                    this.setTarget((class_61)null);
+                                    this.setTarget(null);
                                     this.targetFollow = null;
-                                } else if (stack.itemId == ItemBase.dyePowder.id)
-                                {
+                                } else if (stack.itemId == Item.DYE_POWDER.id) {
                                     this.targetFollow = null;
                                 }
                             }
                         }
                     }
-                } else if (this.targetFollow instanceof EntityClayMan && (double)this.distanceTo(this.targetFollow) < 1.75D) {
+                } else if (this.targetFollow instanceof EntityClayMan && (double) this.distanceTo(this.targetFollow) < 1.75) {
                     this.targetFollow = null;
-                } else if (this.targetFollow instanceof FishHook && (double)this.distanceTo(this.targetFollow) < 1.0D) {
+                } else if (this.targetFollow instanceof FishHookEntity && (double) this.distanceTo(this.targetFollow) < 1.0) {
                     this.targetFollow = null;
-                } else if (this.targetFollow instanceof EntityDirtHorse && (double)this.distanceTo(this.targetFollow) < 0.75D && getGooTime() <= 0) {
-                    if (this.vehicle == null && this.targetFollow.passenger == null && !this.heavyCore && getLogs() <= 0) {
+                } else if (this.targetFollow instanceof EntityDirtHorse && (double) this.distanceTo(this.targetFollow) < 0.75 && this.gooTime <= 0) {
+                    if (this.vehicle == null && this.targetFollow.passenger == null && !this.heavyCore && this.logs <= 0) {
                         this.startRiding(this.targetFollow);
-                        this.level.playSound(this, "step.gravel", 0.6F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+                        this.world.playSound(this, "step.gravel", 0.6F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
                     }
 
                     this.targetFollow = null;
                 }
             } else {
                 this.updateBlockFinder();
-                if (getLogs() > 0 && this.rand.nextInt(16) == 0) {
+                if (this.logs > 0 && this.rand.nextInt(16) == 0) {
                     this.updateBuildings();
                 }
             }
         }
+
+        if (this.isSwinging) {
+            this.lastHandSwingProgress += 0.15F;
+            this.handSwingProgress += 0.15F;
+            if (this.lastHandSwingProgress > 1.0F || this.handSwingProgress > 1.0F) {
+                this.isSwinging = false;
+                this.lastHandSwingProgress = 0.0F;
+                this.handSwingProgress = 0.0F;
+            }
+        }
+
+        if (this.isSwingingLeft) {
+            this.swingLeft += 0.15F;
+            if (this.swingLeft > 1.0F) {
+                this.isSwingingLeft = false;
+                this.swingLeft = 0.0F;
+            }
+        }
+
     }
 
     public void updateBlockFinder() {
@@ -715,7 +607,7 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
         int y = MathHelper.floor(this.boundingBox.minY);
         int z = MathHelper.floor(this.z);
         if (this.blockX != 0 && this.blockY != 0 && this.blockZ != 0 && !this.method_633()) {
-            class_61 emily = this.level.method_189(this, this.blockX, this.blockY, this.blockZ, 16.0F);
+            EntityPath emily = this.world.method_189(this, this.blockX, this.blockY, this.blockZ, 16.0F);
             if (emily != null && this.rand.nextInt(5) != 0) {
                 this.setTarget(emily);
             } else {
@@ -729,7 +621,7 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
         int j = y;
         int k = z;
 
-        for(int q = 0; q < 16; ++q) {
+        for (int q = 0; q < 16; ++q) {
             if (j >= 4 && j <= 124 && this.isAirySpace(i, j, k) && !this.isAirySpace(i, j - 1, k)) {
                 int b = j - 1;
                 if (this.checkSides(i, b, k, i, j, k, this.blocDist(i, b, k, x, y, z), q == 0)) {
@@ -767,22 +659,21 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
     }
 
     public double blocDist(int a, int b, int c, int x, int y, int z) {
-        double i = (double)(a - x);
-        double j = (double)(b - y);
-        double k = (double)(c - z);
+        double i = a - x;
+        double j = b - y;
+        double k = c - z;
         return Math.sqrt(i * i + j * j + k * k);
     }
 
-    // todo: make this more stapi friendly? I feel like this might have issues.
     public boolean isAirySpace(int x, int y, int z) {
-        int p = this.level.getTileId(x, y, z);
-        return p == 0 || BlockBase.BY_ID[p].getCollisionShape(level, x, y, z) == null;
+        int p = this.world.getBlockId(x, y, z);
+        return p == 0 || Block.BY_ID[p].getCollisionShape(this.world, x, y, z) == null;
     }
 
     public boolean checkSides(int a, int b, int c, int i, int j, int k, double dist, boolean first) {
-        if (b > 4 && b < 124 && this.level.getTileId(a, b, c) == BlockBase.CHEST.id) {
+        if (b > 4 && b < 124 && this.world.getBlockId(a, b, c) == Block.CHEST.id) {
             if (first && this.blockX == i && this.blockY == j && this.blockZ == k) {
-                this.setTarget((class_61)null);
+                this.setTarget(null);
                 this.blockX = 0;
                 this.blockY = 0;
                 this.blockZ = 0;
@@ -791,7 +682,7 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
             }
 
             if (this.blockX == 0 && this.blockY == 0 && this.blockZ == 0 && this.chestOperations(a, b, c, false)) {
-                class_61 emily = this.level.method_189(this, i, j, k, 16.0F);
+                EntityPath emily = this.world.method_189(this, i, j, k, 16.0F);
                 if (emily != null) {
                     this.setTarget(emily);
                     this.blockX = i;
@@ -806,48 +697,45 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
     }
 
     public boolean chestOperations(int x, int y, int z, boolean arrived) {
-        TileEntityBase te = this.level.getTileEntity(x, y, z);
-        if (te != null && te instanceof TileEntityChest) {
-            TileEntityChest chest = (TileEntityChest)te;
+        BlockEntity te = this.world.getBlockEntity(x, y, z);
+        if (te != null && te instanceof ChestBlockEntity chest) {
 
-            for(int q = 0; q < chest.getInventorySize(); ++q) {
+            for (int q = 0; q < chest.getInventorySize(); ++q) {
                 if (chest.getInventoryItem(q) != null) {
-                    ItemInstance stack = chest.getInventoryItem(q);
+                    ItemStack stack = chest.getInventoryItem(q);
                     if (stack.count > 0) {
-                        if (getWeaponPoints() <= 0 && stack.itemId == ItemBase.stick.id) {
+                        if (this.weaponPoints <= 0 && stack.itemId == Item.STICK.id) {
                             if (arrived) {
-                                setWeaponPoints(15);
-                                setSharpened(false);
+                                this.weaponPoints = 15;
+                                this.stickSharp = false;
                                 this.gotcha(chest, q);
                             }
 
                             return true;
                         }
 
-                        if (getArmourPoints() <= 0 && stack.itemId == ItemBase.leather.id) {
+                        if (this.armorPoints <= 0 && stack.itemId == Item.LEATHER.id) {
                             if (arrived) {
-                                setArmourPoints(15);
-                                setPadded(false);
+                                this.armorPoints = 15;
+                                this.armorPadded = false;
                                 this.gotcha(chest, q);
                             }
 
                             return true;
                         }
 
-                        /* todo: rocks properly done for server
-
-                        if (getRocks() <= 0 && stack.itemId == BlockBase.GRAVEL.id) {
+                        if (this.rocks <= 0 && stack.itemId == Block.GRAVEL.id) {
                             if (arrived) {
-                                setRocks(15);
+                                this.rocks = 15;
                                 this.gotcha(chest, q);
                             }
 
                             return true;
-                        }*/
+                        }
 
-                        if (!isGlowing() && stack.itemId == ItemBase.glowstoneDust.id) {
+                        if (!this.glowing && stack.itemId == Item.GLOWSTONE_DUST.id) {
                             if (arrived) {
-                                setGlowing(true);
+                                this.glowing = true;
                                 this.gotcha(chest, q);
                             }
 
@@ -855,15 +743,14 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
                         }
 
                         int u;
-                        if (!hasCrown() && stack.itemId == ItemBase.goldIngot.id) {
+                        if (!this.king && stack.itemId == Item.GOLD_INGOT.id) {
                             boolean jack = false;
-                            List list2 = this.level.getEntities(this, this.boundingBox.expand(24.0D, 16.0D, 24.0D));
+                            List list2 = this.world.getEntities(this, this.boundingBox.expand(24.0, 16.0, 24.0));
 
-                            for(u = 0; u < list2.size(); ++u) {
-                                EntityBase entity2 = (EntityBase)list2.get(u);
-                                if (entity2 instanceof EntityClayMan) {
-                                    EntityClayMan clayman = (EntityClayMan)entity2;
-                                    if (clayman.clayTeam == this.clayTeam && hasCrown()) {
+                            for (u = 0; u < list2.size(); ++u) {
+                                Entity entity2 = (Entity) list2.get(u);
+                                if (entity2 instanceof EntityClayMan clayman) {
+                                    if (clayman.clayTeam == this.clayTeam && clayman.king) {
                                         jack = true;
                                         break;
                                     }
@@ -872,23 +759,23 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
 
                             if (!jack) {
                                 if (arrived) {
-                                    setCrowned(true);
+                                    this.king = true;
                                     this.gotcha(chest, q);
                                 }
 
                                 return true;
                             }
                         } else {
-                            if (!isGunpowdered() && stack.itemId == ItemBase.gunpowder.id) {
+                            if (!this.gunpowdered && stack.itemId == Item.GUNPOWDER.id) {
                                 if (arrived) {
-                                    setGunpowdered(true);
+                                    this.gunpowdered = true;
                                     this.gotcha(chest, q);
                                 }
 
                                 return true;
                             }
 
-                            if (this.sugarTime <= 0 && stack.itemId == ItemBase.sugar.id) {
+                            if (this.sugarTime <= 0 && stack.itemId == Item.SUGAR.id) {
                                 if (arrived) {
                                     this.sugarTime = 1200;
                                     this.gotcha(chest, q);
@@ -897,7 +784,7 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
                                 return true;
                             }
 
-                            if (this.foodLeft <= 0 && stack.getType() != null && stack.getType() instanceof FoodBase) {
+                            if (this.foodLeft <= 0 && stack.getItem() != null && stack.getItem() instanceof FoodItem) {
                                 if (arrived) {
                                     this.foodLeft = 4;
                                     this.gotcha(chest, q);
@@ -906,7 +793,7 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
                                 return true;
                             }
 
-                            if (this.resPoints <= 0 && stack.itemId == ItemBase.clay.id) {
+                            if (this.resPoints <= 0 && stack.itemId == Item.CLAY.id) {
                                 if (arrived) {
                                     this.resPoints = 4;
                                     this.gotcha(chest, q);
@@ -915,7 +802,7 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
                                 return true;
                             }
 
-                            if (this.gooStock <= 0 && stack.itemId == ItemBase.slimeball.id) {
+                            if (this.gooStock <= 0 && stack.itemId == Item.SLIMEBALL.id) {
                                 if (arrived) {
                                     this.gooStock = 2;
                                     this.gotcha(chest, q);
@@ -924,7 +811,7 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
                                 return true;
                             }
 
-                            if (this.smokeStock <= 0 && stack.itemId == ItemBase.redstoneDust.id) {
+                            if (this.smokeStock <= 0 && stack.itemId == Item.REDSTONE_DUST.id) {
                                 if (arrived) {
                                     this.smokeStock = 2;
                                     this.gotcha(chest, q);
@@ -933,16 +820,16 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
                                 return true;
                             }
 
-                            if (stack.itemId == BlockBase.LOG.id && this.vehicle == null) {
+                            if (stack.itemId == Block.LOG.id && this.vehicle == null) {
                                 int gottam = 0;
-                                if (getLogs() < 20 && stack.count >= 5) {
+                                if (this.logs < 20 && stack.count >= 5) {
                                     gottam = 1;
                                 }
 
                                 if (arrived && gottam > 0) {
-                                    this.level.playSound(this, "random.pop", 0.2F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+                                    this.world.playSound(this, "random.pop", 0.2F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
                                     if (gottam == 1) {
-                                        setLogs(getLogs() + 5);
+                                        this.logs += 5;
                                         chest.takeInventoryItem(q, 5);
                                     }
                                 }
@@ -953,41 +840,42 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
                             double a;
                             double b;
                             int j;
-                            if (getWeaponPoints() > 0 && !isSharpened() && stack.itemId == ItemBase.flint.id) {
+                            //if (this.weaponPoints > 0 && !this.stickSharp && stack.itemId == ItemBase.flint.id) {
+                            if (this.weaponPoints > 0 && !this.stickSharp && stack.itemId == Item.FLINT.id) {
                                 if (arrived) {
-                                    setSharpened(true);
+                                    this.stickSharp = true;
 
-                                    for(j = 0; j < 4; ++j) {
-                                        a = this.x + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                                        a = this.boundingBox.minY + 0.125D + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.25D;
-                                        b = this.z + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                                        //todo: ModLoader.getMinecraftInstance().effectRenderer.addEffect(new EntityDiggingFX(this.worldObj, a, a, b, 0.0D, 0.0D, 0.0D, Block.planks, 0, 0));
+                                    for (j = 0; j < 4; ++j) {
+                                        a = this.x + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                                        a = this.boundingBox.minY + 0.125 + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.25;
+                                        b = this.z + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                                        ClientUtil.addDiggingParticle(this.world, a, a, b, 0.0, 0.0, 0.0, Block.WOOD, 0, 0);
                                     }
 
-                                    this.level.playSound(this, "random.wood click", 0.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+                                    this.world.playSound(this, "random.wood click", 0.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
                                 }
 
                                 return true;
                             }
 
-                            if (getArmourPoints() > 0 && !isPadded() && stack.itemId == BlockBase.WOOL.id) {
+                            if (this.armorPoints > 0 && !this.armorPadded && stack.itemId == Block.WOOL.id) {
                                 if (arrived) {
-                                    setPadded(true);
+                                    this.armorPadded = true;
 
-                                    for(j = 0; j < 4; ++j) {
-                                        a = this.x + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                                        a = this.boundingBox.minY + 0.125D + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.25D;
-                                        b = this.z + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                                        //todo: ModLoader.getMinecraftInstance().effectRenderer.addEffect(new EntityDiggingFX(this.worldObj, a, a, b, 0.0D, 0.0D, 0.0D, Block.cloth, 0, 0));
+                                    for (j = 0; j < 4; ++j) {
+                                        a = this.x + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                                        a = this.boundingBox.minY + 0.125 + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.25;
+                                        b = this.z + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                                        ClientUtil.addDiggingParticle(this.world, a, a, b, 0.0, 0.0, 0.0, Block.WOOL, 0, 0);
                                     }
 
-                                    this.level.playSound(this, "step.cloth", 0.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+                                    this.world.playSound(this, "step.cloth", 0.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
                                 }
 
                                 return true;
                             }
 
-                            if (!this.heavyCore && this.vehicle == null && stack.itemId == ItemBase.ironIngot.id) {
+                            if (!this.heavyCore && this.vehicle == null && stack.itemId == Item.IRON_INGOT.id) {
                                 if (arrived) {
                                     this.heavyCore = true;
                                     this.gotcha(chest, q);
@@ -996,12 +884,11 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
                                 return true;
                             }
 
-                            if (this.resPoints > 0 && stack.getType() != null && stack.getType() instanceof ItemClayMan) {
-                                ItemClayMan ic = (ItemClayMan)stack.getType();
+                            if (this.resPoints > 0 && stack.getItem() != null && stack.getItem() instanceof ItemClayMan ic) {
                                 if (ic.clayTeam == this.clayTeam) {
                                     if (arrived) {
                                         this.swingArm();
-                                        ItemBase item1 = ItemListener.greyDoll.asItem();
+                                        Item item1 = ItemListener.greyDoll.asItem();
                                         if (this.clayTeam == 1) {
                                             item1 = ItemListener.redDoll.asItem();
                                         } else if (this.clayTeam == 2) {
@@ -1016,18 +903,18 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
                                             item1 = ItemListener.purpleDoll.asItem();
                                         }
 
-                                        for(u = 0; u < 18; ++u) {
-                                            a = this.x + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                                            b = this.y + 0.25D + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                                            double c = this.z + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                                            //todo: ModLoader.getMinecraftInstance().effectRenderer.addEffect(new EntitySlimeFX(this.worldObj, a, b, c, item1));
+                                        for (u = 0; u < 18; ++u) {
+                                            a = this.x + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                                            b = this.y + 0.25 + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                                            double c = this.z + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                                            ClientUtil.addPoofParticle(this.world, a, b, c, item1);
                                         }
 
-                                        double a1 = this.x + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                                        double b1 = this.y + (double)this.rand.nextFloat() * 0.125D;
-                                        double c1 = this.z + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                                        EntityClayMan ec = new EntityClayMan(this.level, a1, b1, c1, this.clayTeam);
-                                        this.level.spawnEntity(ec);
+                                        double a1 = this.x + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                                        double b1 = this.y + (double) this.rand.nextFloat() * 0.125;
+                                        double c1 = this.z + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                                        EntityClayMan ec = new EntityClayMan(this.world, a1, b1, c1, this.clayTeam);
+                                        this.world.spawnEntity(ec);
                                         this.gotcha(chest, q);
                                         --this.resPoints;
                                     }
@@ -1051,21 +938,21 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
         if (y >= 4 && y <= 120) {
             int broad = 2;
             int high = 3;
-            if (getLogs() == 20) {
+            if (this.logs == 20) {
                 broad = 3;
                 high = 4;
             }
 
             boolean flag = false;
 
-            for(int a = -broad; a < broad + 1 && !flag; ++a) {
-                for(int b = -1; b < high + 1 && !flag; ++b) {
-                    for(int c = -broad; c < broad + 1 && !flag; ++c) {
+            for (int a = -broad; a < broad + 1 && !flag; ++a) {
+                for (int b = -1; b < high + 1 && !flag; ++b) {
+                    for (int c = -broad; c < broad + 1 && !flag; ++c) {
                         if (b == -1) {
                             if (this.isAirySpace(x + a, y + b, z + c)) {
                                 flag = true;
                             }
-                        } else if (!this.isAirySpace(x + a, y + b, z + c) || this.level.getMaterial(x + a, y + b, z + c) == Material.WATER) {
+                        } else if (!this.isAirySpace(x + a, y + b, z + c) || this.world.getMaterial(x + a, y + b, z + c) == Material.WATER) {
                             flag = true;
                         }
                     }
@@ -1073,19 +960,19 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
             }
 
             if (!flag) {
-                double gee = (double)broad;
-                List list = this.level.getEntities(this, this.boundingBox.expand(gee, gee, gee));
+                double gee = broad;
+                List list = this.world.getEntities(this, this.boundingBox.expand(gee, gee, gee));
                 if (list.size() > 0) {
                     flag = true;
                 }
             }
 
             if (!flag) {
-                if (getLogs() == 20 && this.rand.nextInt(2) == 0) {
+                if (this.logs == 20 && this.rand.nextInt(2) == 0) {
                     this.buildHouseThree();
-                } else if (getLogs() >= 10 && this.rand.nextInt(3) > 0) {
+                } else if (this.logs >= 10 && this.rand.nextInt(3) > 0) {
                     this.buildHouseTwo();
-                } else if (getLogs() >= 5) {
+                } else if (this.logs >= 5) {
                     this.buildHouseOne();
                 }
             }
@@ -1094,21 +981,21 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
     }
 
     public void dropLogs() {
-        this.dropItem(BlockBase.LOG.id, getLogs());
-        setLogs(0);
+        this.dropItem(Block.LOG.id, this.logs);
+        this.logs = 0;
     }
 
     public void buildHouseOne() {
-        int x = MathHelper.floor(this.x + 0.5D);
+        int x = MathHelper.floor(this.x + 0.5);
         int y = MathHelper.floor(this.boundingBox.minY);
-        int z = MathHelper.floor(this.z + 0.5D);
+        int z = MathHelper.floor(this.z + 0.5);
         int direction = this.rand.nextInt(4);
 
-        for(int j = 0; j < 3; ++j) {
+        for (int j = 0; j < 3; ++j) {
             int b = j;
 
-            for(int i = -1; i < 3; ++i) {
-                for(int k = -1; k < 2; ++k) {
+            for (int i = -1; i < 3; ++i) {
+                for (int k = -1; k < 2; ++k) {
                     int a = i;
                     int c = k;
                     if (direction % 2 == 0) {
@@ -1124,38 +1011,38 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
 
                     if (j == 0) {
                         if (i != -1 && i != 2 && k != -1) {
-                            this.level.setTile(x + a, y + b, z + c, 0);
+                            this.world.setBlock(x + a, y + b, z + c, 0);
                         } else {
-                            this.level.setTile(x + a, y + b, z + c, BlockBase.WOOD.id);
+                            this.world.setBlock(x + a, y + b, z + c, Block.WOOD.id);
                         }
                     } else if (j == 1) {
                         if (i == -1) {
-                            this.level.setTileInChunk(x + a, y + b, z + c, BlockBase.WOOD_STAIRS.id);
-                            this.level.setTileMeta(x + a, y + b, z + c, (direction + 2 + (direction % 2 == 0 ? 1 : -1)) % 4);
+                            this.world.setBlockInChunk(x + a, y + b, z + c, Block.WOOD_STAIRS.id);
+                            this.world.setBlockMeta(x + a, y + b, z + c, (direction + 2 + (direction % 2 == 0 ? 1 : -1)) % 4);
                         } else if (i == 2) {
-                            this.level.setTileInChunk(x + a, y + b, z + c, BlockBase.WOOD_STAIRS.id);
-                            this.level.setTileMeta(x + a, y + b, z + c, (direction + 2) % 4);
+                            this.world.setBlockInChunk(x + a, y + b, z + c, Block.WOOD_STAIRS.id);
+                            this.world.setBlockMeta(x + a, y + b, z + c, (direction + 2) % 4);
                         } else if (k == -1) {
-                            this.level.setTile(x + a, y + b, z + c, BlockBase.WOOD.id);
+                            this.world.setBlock(x + a, y + b, z + c, Block.WOOD.id);
                         } else {
-                            this.level.setTile(x + a, y + b, z + c, 0);
+                            this.world.setBlock(x + a, y + b, z + c, 0);
                         }
                     } else if (i == 0) {
-                        this.level.setTileInChunk(x + a, y + b, z + c, BlockBase.WOOD_STAIRS.id);
-                        this.level.setTileMeta(x + a, y + b, z + c, (direction + 2 + (direction % 2 == 0 ? 1 : -1)) % 4);
+                        this.world.setBlockInChunk(x + a, y + b, z + c, Block.WOOD_STAIRS.id);
+                        this.world.setBlockMeta(x + a, y + b, z + c, (direction + 2 + (direction % 2 == 0 ? 1 : -1)) % 4);
                     } else if (i == 1) {
-                        this.level.setTileInChunk(x + a, y + b, z + c, BlockBase.WOOD_STAIRS.id);
-                        this.level.setTileMeta(x + a, y + b, z + c, (direction + 2) % 4);
+                        this.world.setBlockInChunk(x + a, y + b, z + c, Block.WOOD_STAIRS.id);
+                        this.world.setBlockMeta(x + a, y + b, z + c, (direction + 2) % 4);
                     } else {
-                        this.level.setTile(x + a, y + b, z + c, 0);
+                        this.world.setBlock(x + a, y + b, z + c, 0);
                     }
                 }
             }
         }
 
-        this.level.playSound(this, "random.wood click", 1.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
-        this.level.playSound(this, "step.wood", 1.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
-        setLogs(getLogs() - 5);
+        this.world.playSound(this, "random.wood click", 1.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+        this.world.playSound(this, "step.wood", 1.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+        this.logs -= 5;
     }
 
     public void buildHouseTwo() {
@@ -1164,11 +1051,11 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
         int z = MathHelper.floor(this.z);
         int direction = this.rand.nextInt(4);
 
-        for(int j = 0; j < 3; ++j) {
+        for (int j = 0; j < 3; ++j) {
             int b = j;
 
-            for(int i = -2; i < 3; ++i) {
-                for(int k = -2; k < 3; ++k) {
+            for (int i = -2; i < 3; ++i) {
+                for (int k = -2; k < 3; ++k) {
                     int a = i;
                     int c = k;
                     if (direction % 2 == 0) {
@@ -1186,34 +1073,34 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
                         if (j != 0 && j != 1) {
                             if (j == 2) {
                                 if (i == -2) {
-                                    this.level.setTileInChunk(x + a, y + b, z + c, BlockBase.WOOD_STAIRS.id);
-                                    this.level.setTileMeta(x + a, y + b, z + c, (direction + 2 + (direction % 2 == 0 ? 1 : -1)) % 4);
+                                    this.world.setBlockInChunk(x + a, y + b, z + c, Block.WOOD_STAIRS.id);
+                                    this.world.setBlockMeta(x + a, y + b, z + c, (direction + 2 + (direction % 2 == 0 ? 1 : -1)) % 4);
                                 } else if (i == 2) {
-                                    this.level.setTileInChunk(x + a, y + b, z + c, BlockBase.WOOD_STAIRS.id);
-                                    this.level.setTileMeta(x + a, y + b, z + c, (direction + 2) % 4);
+                                    this.world.setBlockInChunk(x + a, y + b, z + c, Block.WOOD_STAIRS.id);
+                                    this.world.setBlockMeta(x + a, y + b, z + c, (direction + 2) % 4);
                                 } else if (k == -2) {
-                                    this.level.setTileInChunk(x + a, y + b, z + c, BlockBase.WOOD_STAIRS.id);
-                                    this.level.setTileMeta(x + a, y + b, z + c, (direction + (direction % 2 == 0 ? 1 : -1)) % 4);
+                                    this.world.setBlockInChunk(x + a, y + b, z + c, Block.WOOD_STAIRS.id);
+                                    this.world.setBlockMeta(x + a, y + b, z + c, (direction + (direction % 2 == 0 ? 1 : -1)) % 4);
                                 } else if (k == 2) {
-                                    this.level.setTileInChunk(x + a, y + b, z + c, BlockBase.WOOD_STAIRS.id);
-                                    this.level.setTileMeta(x + a, y + b, z + c, direction % 4);
+                                    this.world.setBlockInChunk(x + a, y + b, z + c, Block.WOOD_STAIRS.id);
+                                    this.world.setBlockMeta(x + a, y + b, z + c, direction % 4);
                                 } else {
-                                    this.level.setTile(x + a, y + b, z + c, BlockBase.WOOD.id);
+                                    this.world.setBlock(x + a, y + b, z + c, Block.WOOD.id);
                                 }
                             }
                         } else if (i != -2 && i != 2 && k != -2 && (k != 2 || i == 0 && j != 1)) {
-                            this.level.setTile(x + a, y + b, z + c, 0);
+                            this.world.setBlock(x + a, y + b, z + c, 0);
                         } else {
-                            this.level.setTile(x + a, y + b, z + c, BlockBase.WOOD.id);
+                            this.world.setBlock(x + a, y + b, z + c, Block.WOOD.id);
                         }
                     }
                 }
             }
         }
 
-        this.level.playSound(this, "random.wood click", 1.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
-        this.level.playSound(this, "step.wood", 1.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
-        setLogs(getLogs() - 10);
+        this.world.playSound(this, "random.wood click", 1.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+        this.world.playSound(this, "step.wood", 1.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+        this.logs -= 10;
     }
 
     public void buildHouseThree() {
@@ -1222,11 +1109,11 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
         int z = MathHelper.floor(this.z);
         int direction = this.rand.nextInt(4);
 
-        for(int j = 0; j < 4; ++j) {
+        for (int j = 0; j < 4; ++j) {
             int b = j;
 
-            for(int i = -3; i < 4; ++i) {
-                for(int k = -2; k < 3; ++k) {
+            for (int i = -3; i < 4; ++i) {
+                for (int k = -2; k < 3; ++k) {
                     int a = i;
                     int c = k;
                     if (direction % 2 == 0) {
@@ -1244,43 +1131,43 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
                         if (j < 3) {
                             if (i != -3 && i != 3 && k != -2 && (k != 2 || i == 0 && j <= 0)) {
                                 if (i == -2 && j == 0 && k == 0) {
-                                    this.level.setTileInChunk(x + a, y + b, z + c, BlockBase.CHEST.id);
-                                    this.level.setTileMeta(x + a, y + b, z + c, (direction + 2) % 4);
-                                    TileEntityChest chest = (TileEntityChest)this.level.getTileEntity(x + a, y + b, z + c);
-                                    chest.setInventoryItem(0, new ItemInstance(ItemBase.stick, 16, 0));
+                                    this.world.setBlockInChunk(x + a, y + b, z + c, Block.CHEST.id);
+                                    this.world.setBlockMeta(x + a, y + b, z + c, (direction + 2) % 4);
+                                    ChestBlockEntity chest = (ChestBlockEntity) this.world.getBlockEntity(x + a, y + b, z + c);
+                                    chest.setInventoryItem(0, new ItemStack(Item.STICK, 16, 0));
                                 } else if (i == 0 && j == 0 && k == -1) {
-                                    this.level.setTileInChunk(x + a, y + b, z + c, BlockBase.WOOD_STAIRS.id);
-                                    this.level.setTileMeta(x + a, y + b, z + c, (direction + 2 + (direction % 2 == 0 ? 1 : -1)) % 4);
+                                    this.world.setBlockInChunk(x + a, y + b, z + c, Block.WOOD_STAIRS.id);
+                                    this.world.setBlockMeta(x + a, y + b, z + c, (direction + 2 + (direction % 2 == 0 ? 1 : -1)) % 4);
                                 } else if (i == 1 && j == 1 && k == -1) {
-                                    this.level.setTileInChunk(x + a, y + b, z + c, BlockBase.WOOD_STAIRS.id);
-                                    this.level.setTileMeta(x + a, y + b, z + c, (direction + 2 + (direction % 2 == 0 ? 1 : -1)) % 4);
+                                    this.world.setBlockInChunk(x + a, y + b, z + c, Block.WOOD_STAIRS.id);
+                                    this.world.setBlockMeta(x + a, y + b, z + c, (direction + 2 + (direction % 2 == 0 ? 1 : -1)) % 4);
                                 } else if (i == 2 && j == 1 && k == -1) {
-                                    this.level.setTile(x + a, y + b, z + c, BlockBase.WOOD.id);
+                                    this.world.setBlock(x + a, y + b, z + c, Block.WOOD.id);
                                 } else if (i == 2 && j == 2 && k == 0) {
-                                    this.level.setTileInChunk(x + a, y + b, z + c, BlockBase.WOOD_STAIRS.id);
-                                    this.level.setTileMeta(x + a, y + b, z + c, (direction + (direction % 2 == 0 ? 1 : -1)) % 4);
+                                    this.world.setBlockInChunk(x + a, y + b, z + c, Block.WOOD_STAIRS.id);
+                                    this.world.setBlockMeta(x + a, y + b, z + c, (direction + (direction % 2 == 0 ? 1 : -1)) % 4);
                                 } else if (i == 0 && j == 2 && k == -1) {
-                                    this.level.setTile(x + a, y + b, z + c, 0);
+                                    this.world.setBlock(x + a, y + b, z + c, 0);
                                 } else if (i == 1 && j == 2 && k == -1) {
-                                    this.level.setTile(x + a, y + b, z + c, 0);
+                                    this.world.setBlock(x + a, y + b, z + c, 0);
                                 } else if (i == 2 && j == 2 && k == -1) {
-                                    this.level.setTile(x + a, y + b, z + c, 0);
+                                    this.world.setBlock(x + a, y + b, z + c, 0);
                                 } else if (j == 2) {
-                                    this.level.setTile(x + a, y + b, z + c, BlockBase.WOOD.id);
+                                    this.world.setBlock(x + a, y + b, z + c, Block.WOOD.id);
                                 } else {
-                                    this.level.setTile(x + a, y + b, z + c, 0);
+                                    this.world.setBlock(x + a, y + b, z + c, 0);
                                 }
                             } else {
-                                this.level.setTile(x + a, y + b, z + c, BlockBase.WOOD.id);
+                                this.world.setBlock(x + a, y + b, z + c, Block.WOOD.id);
                             }
                         } else if (j == 3) {
                             if (i != -3 && i != 3 && k != -2 && (k != 2 || i == 0 && j <= 0)) {
-                                this.level.setTile(x + a, y + b, z + c, 0);
+                                this.world.setBlock(x + a, y + b, z + c, 0);
                             } else if (i != -2 && i != 0 && i != 2 && k != 0) {
-                                this.level.setTile(x + a, y + b, z + c, BlockBase.WOOD.id);
-                                this.level.setTileMeta(x + a, y + b, z + c, 2);
+                                this.world.setBlock(x + a, y + b, z + c, Block.STONE_SLAB.id);
+                                this.world.setBlockMeta(x + a, y + b, z + c, 2);
                             } else {
-                                this.level.setTile(x + a, y + b, z + c, BlockBase.WOOD.id);
+                                this.world.setBlock(x + a, y + b, z + c, Block.WOOD.id);
                             }
                         }
                     }
@@ -1288,90 +1175,78 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
             }
         }
 
-        this.level.playSound(this, "random.wood click", 1.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
-        this.level.playSound(this, "step.wood", 1.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
-        setLogs(getLogs() - 20);
+        this.world.playSound(this, "random.wood click", 1.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+        this.world.playSound(this, "step.wood", 1.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+        this.logs -= 20;
     }
 
-    @Override
     public void travel(float f, float f1) {
-        // moveEntityWithHeading -> travel
         super.travel(f, f1);
-        double d2 = (this.x - this.prevX) * 2.0D;
-        double d3 = (this.z - this.prevZ) * 2.0D;
+        double d2 = (this.x - this.prevX) * 2.0;
+        double d3 = (this.z - this.prevZ) * 2.0;
         float f5 = MathHelper.sqrt(d2 * d2 + d3 * d3) * 4.0F;
         if (f5 > 1.0F) {
             f5 = 1.0F;
         }
 
-        // field_704_R -> limbDistance
         this.limbDistance += (f5 - this.limbDistance) * 0.4F;
-        // field 703_S -> field_1050
         this.field_1050 += this.limbDistance;
     }
 
     public void swingArm() {
-        if (!isSwinging()) {
-            setSwinging(true);
-            // prevSwingProcess -> lastHandSwingProgress
+        if (!this.isSwinging) {
+            this.isSwinging = true;
             this.lastHandSwingProgress = 0.0F;
-            // swingProgress -> handSwingProgress
             this.handSwingProgress = 0.0F;
         }
 
     }
 
     public void swingLeftArm() {
-        if (!isLeftSwinging()) {
-            setLeftSwinging(true);
+        if (!this.isSwingingLeft) {
+            this.isSwingingLeft = true;
             this.swingLeft = 0.01F;
         }
 
     }
 
-    public boolean hitTargetMakesDead(EntityBase e) {
+    public boolean hitTargetMakesDead(Entity e) {
         this.strikeTime = 12;
         this.swingArm();
-        int power = getWeaponPoints() > 0 ? 3 + this.rand.nextInt(2) + (isSharpened() ? 1 : 0) : 2;
-        if (getWeaponPoints() > 0) {
-            setWeaponPoints(getWeaponPoints()-1);
+        int power = this.weaponPoints > 0 ? 3 + this.rand.nextInt(2) + (this.stickSharp ? 1 : 0) : 2;
+        if (this.weaponPoints > 0) {
+            --this.weaponPoints;
         }
 
         boolean flag = e.damage(this, power);
-        if (flag && e instanceof Living) {
-            Living el = (Living)e;
-            if (el.health <= 0) {
-                return true;
-            }
+        if (flag && e instanceof LivingEntity el) {
+            return el.health <= 0;
         }
 
         return false;
     }
 
-    public void throwRockAtEnemy(EntityBase entity) {
-        /* major todo:
-        double d = entity.z - this.x;
+    public void throwRockAtEnemy(Entity entity) {
+        double d = entity.x - this.x;
         double d1 = entity.z - this.z;
-        EntityGravelChunk entitygravelchunk = new EntityGravelChunk(this.level, this, this.clayTeam);
-        entitygravelchunk.y += 0.3999999761581421D;
-        double d2 = entity.y + (double)entity.getEyeHeight() - 0.10000000298023223D - entitygravelchunk.y;
+        EntityGravelChunk entitygravelchunk = new EntityGravelChunk(this.world, this, this.clayTeam);
+        entitygravelchunk.y += 0.3999999761581421;
+        double d2 = entity.y + (double) entity.getStandingEyeHeight() - 0.10000000298023223 - entitygravelchunk.y;
         float f1 = MathHelper.sqrt(d * d + d1 * d1) * 0.2F;
-        this.level.spawnEntity(entitygravelchunk);
-        entitygravelchunk.setArrowHeading(d, d2 + (double)f1, d1, 0.6F, 12.0F);
+        this.world.spawnEntity(entitygravelchunk);
+        entitygravelchunk.setArrowHeading(d, d2 + (double) f1, d1, 0.6F, 12.0F);
         this.attackTime = 30;
-        this.field_1029 = -this.field_1029;
-        this.yaw = (float)(Math.atan2(d1, d) * 180.0D / 3.1415927410125732D) - 90.0F;
-        // hasAttacked
+        this.forwardVelocity = -this.forwardVelocity;
+        this.yaw = (float) (Math.atan2(d1, d) * 180.0 / 3.1415927410125732) - 90.0F;
         this.field_663 = true;
-        this.swingLeftArm();*/
+        this.swingLeftArm();
     }
 
-    public void gotcha(Item item) {
-        this.level.playSound(item, "random.pop", 0.2F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
-        if (item.item != null) {
-            --item.item.count;
-            if (item.item.count <= 0) {
-                // setEntityDead -> remove
+    public void gotcha(ItemEntity item) {
+        this.world.playSound(item, "random.pop", 0.2F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+        if (item.stack != null) {
+            --item.stack.count;
+            if (item.stack.count <= 0) {
                 item.remove();
             }
         } else {
@@ -1379,102 +1254,94 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
         }
 
         this.targetFollow = null;
-        this.setTarget((class_61)null);
+        this.setTarget(null);
     }
 
-    public void gotcha(TileEntityChest chest, int q) {
-        this.level.playSound(this, "random.pop", 0.2F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
-        //decrStackSize -> takeInventoryItem
+    public void gotcha(ChestBlockEntity chest, int q) {
+        this.world.playSound(this, "random.pop", 0.2F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
         chest.takeInventoryItem(q, 1);
     }
 
-    @Override
-    public void writeCustomDataToTag(CompoundTag nbttagcompound) {
-        super.writeCustomDataToTag(nbttagcompound);
-        nbttagcompound.put("ClayTeam", (short)this.clayTeam);
-        nbttagcompound.put("WeaponPoints", (short)getWeaponPoints());
-        nbttagcompound.put("ArmorPoints", (short)getArmourPoints());
-        nbttagcompound.put("FoodLeft", (short)this.foodLeft);
-        nbttagcompound.put("SugarTime", (short)this.sugarTime);
-        nbttagcompound.put("ResPoints", (short)this.resPoints);
-        nbttagcompound.put("StrikeTime", (short)this.strikeTime);
-        nbttagcompound.put("ClimbTime", (short)this.climbTime);
-        nbttagcompound.put("GooTime", (short)getGooTime());
-        nbttagcompound.put("SmokeTime", (short)this.smokeTime);
-        nbttagcompound.put("GooStock", (short)this.gooStock);
-        nbttagcompound.put("SmokeStock", (short)this.smokeStock);
-        nbttagcompound.put("Logs", (short)getLogs());
-        nbttagcompound.put("Rocks", (short)getRocks());
-        nbttagcompound.put("Gunpowdered", isGunpowdered());
-        nbttagcompound.put("King", hasCrown());
-        nbttagcompound.put("Glowing", isGlowing());
-        nbttagcompound.put("StickSharp", isSharpened());
-        nbttagcompound.put("ArmorPadded", isPadded());
+    public void writeNBT(CompoundTag nbttagcompound) {
+        super.writeNBT(nbttagcompound);
+        nbttagcompound.put("ClayTeam", (short) this.clayTeam);
+        nbttagcompound.put("WeaponPoints", (short) this.weaponPoints);
+        nbttagcompound.put("ArmorPoints", (short) this.armorPoints);
+        nbttagcompound.put("FoodLeft", (short) this.foodLeft);
+        nbttagcompound.put("SugarTime", (short) this.sugarTime);
+        nbttagcompound.put("ResPoints", (short) this.resPoints);
+        nbttagcompound.put("StrikeTime", (short) this.strikeTime);
+        nbttagcompound.put("ClimbTime", (short) this.climbTime);
+        nbttagcompound.put("GooTime", (short) this.gooTime);
+        nbttagcompound.put("SmokeTime", (short) this.smokeTime);
+        nbttagcompound.put("GooStock", (short) this.gooStock);
+        nbttagcompound.put("SmokeStock", (short) this.smokeStock);
+        nbttagcompound.put("Logs", (short) this.logs);
+        nbttagcompound.put("Rocks", (short) this.rocks);
+        nbttagcompound.put("Gunpowdered", this.gunpowdered);
+        nbttagcompound.put("King", this.king);
+        nbttagcompound.put("Glowing", this.glowing);
+        nbttagcompound.put("StickSharp", this.stickSharp);
+        nbttagcompound.put("ArmorPadded", this.armorPadded);
         nbttagcompound.put("HeavyCore", this.heavyCore);
     }
 
-    @Override
-    public void readCustomDataFromTag(CompoundTag nbttagcompound) {
-        super.readCustomDataFromTag(nbttagcompound);
+    public void readNBT(CompoundTag nbttagcompound) {
+        super.readNBT(nbttagcompound);
         this.clayTeam = nbttagcompound.getShort("ClayTeam");
         this.texture = this.clayManTexture(this.clayTeam);
-        setWeaponPoints(nbttagcompound.getShort("WeaponPoints"));
-        setArmourPoints(nbttagcompound.getShort("ArmorPoints"));
+        this.weaponPoints = nbttagcompound.getShort("WeaponPoints");
+        this.armorPoints = nbttagcompound.getShort("ArmorPoints");
         this.foodLeft = nbttagcompound.getShort("FoodLeft");
         this.sugarTime = nbttagcompound.getShort("SugarTime");
         this.resPoints = nbttagcompound.getShort("ResPoints");
         this.strikeTime = nbttagcompound.getShort("StrikeTime");
         this.climbTime = nbttagcompound.getShort("ClimbTime");
-        setGooTime(nbttagcompound.getShort("GooTime"));
+        this.gooTime = nbttagcompound.getShort("GooTime");
         this.smokeTime = nbttagcompound.getShort("SmokeTime");
         this.gooStock = nbttagcompound.getShort("GooStock");
         this.smokeStock = nbttagcompound.getShort("SmokeStock");
-        setLogs(nbttagcompound.getShort("Logs"));
-        setRocks(nbttagcompound.getShort("Rocks"));
-        setGunpowdered(nbttagcompound.getBoolean("Gunpowdered"));
-        setCrowned(nbttagcompound.getBoolean("King"));
-        setGlowing(nbttagcompound.getBoolean("Glowing"));
-        setSharpened(nbttagcompound.getBoolean("StickSharp"));
-        setPadded(nbttagcompound.getBoolean("ArmorPadded"));
+        this.logs = nbttagcompound.getShort("Logs");
+        this.rocks = nbttagcompound.getShort("Rocks");
+        this.gunpowdered = nbttagcompound.getBoolean("Gunpowdered");
+        this.king = nbttagcompound.getBoolean("King");
+        this.glowing = nbttagcompound.getBoolean("Glowing");
+        this.stickSharp = nbttagcompound.getBoolean("StickSharp");
+        this.armorPadded = nbttagcompound.getBoolean("ArmorPadded");
         this.heavyCore = nbttagcompound.getBoolean("HeavyCore");
     }
 
-    @Override
     protected String getHurtSound() {
-        this.level.playSound(this, "random.hurt", 0.6F, 1.0F * (this.rand.nextFloat() * 0.2F + 1.6F));
-        this.level.playSound(this, "step.gravel", 0.6F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+        this.world.playSound(this, "random.hurt", 0.6F, (this.rand.nextFloat() * 0.2F + 1.6F));
+        this.world.playSound(this, "step.gravel", 0.6F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
         return "";
     }
 
-    @Override
     protected String getDeathSound() {
-        this.level.playSound(this, "random.hurt", 0.6F, 1.0F * (this.rand.nextFloat() * 0.2F + 1.6F));
+        this.world.playSound(this, "random.hurt", 0.6F, (this.rand.nextFloat() * 0.2F + 1.6F));
         return "step.gravel";
     }
 
-    @Override
     protected void jump() {
-        if (getGooTime() <= 0) {
+        if (this.gooTime <= 0) {
             if (this.sugarTime > 0) {
-                this.velocityY = 0.375D;
+                this.yVelocity = 0.375;
             } else {
-                this.velocityY = 0.275D;
+                this.yVelocity = 0.275;
             }
+
         }
     }
 
-    @Override
     public boolean method_932() {
-        // isOnLadder
-        // isCollidedHorizontally -> field_1624
-        if (getLogs() <= 0 && this.field_1624 && !this.onGround && this.climbTime > 0) {
+        if (this.logs <= 0 && this.field_1624 && !this.onGround && this.climbTime > 0) {
             if (this.climbTime != 10) {
                 this.throwTime = 5;
                 --this.climbTime;
                 return true;
             }
 
-            if (this.velocityY < 0.05D) {
+            if (this.yVelocity < 0.05) {
                 --this.climbTime;
                 this.throwTime = 5;
                 return true;
@@ -1484,19 +1351,57 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
         return false;
     }
 
-    @Override
-    protected boolean method_940() { // canDespawn
+    protected boolean canDespawn() {
         return false;
+    }
+
+    public boolean hasStick() {
+        return this.weaponPoints > 0;
+    }
+
+    public boolean hasArmor() {
+        return this.armorPoints > 0;
+    }
+
+    public boolean hasSpecks() {
+        return this.gunpowdered;
+    }
+
+    public boolean hasCrown() {
+        return this.king;
+    }
+
+    public boolean isGlowing() {
+        return this.glowing;
+    }
+
+    public boolean isSharpened() {
+        return this.stickSharp;
+    }
+
+    public boolean isPadded() {
+        return this.armorPadded;
+    }
+
+    public boolean isGooey() {
+        return this.gooTime > 0;
+    }
+
+    public boolean hasLogs() {
+        return this.logs > 0;
     }
 
     public float armLeft() {
         return this.swingLeft;
     }
 
-    @Override
+    public boolean hasRocks() {
+        return this.rocks > 0 && this.throwTime <= 0 && this.logs <= 0;
+    }
+
     public void getDrops() {
-        if (!isGunpowdered()) {
-            ItemBase item1 = ItemListener.greyDoll.asItem();
+        if (!this.gunpowdered) {
+            Item item1 = ItemListener.greyDoll.asItem();
             if (this.clayTeam == 1) {
                 item1 = ItemListener.redDoll.asItem();
             } else if (this.clayTeam == 2) {
@@ -1513,69 +1418,66 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
 
             this.dropItem(item1.id, 1);
             if (this.resPoints > 0) {
-                this.dropItem(ItemBase.clay.id, 1);
+                this.dropItem(Item.CLAY.id, 1);
             }
 
-            if (getWeaponPoints() > 7 && this.rand.nextInt(2) == 0) {
-                this.dropItem(ItemBase.stick.id, 1);
+            if (this.weaponPoints > 7 && this.rand.nextInt(2) == 0) {
+                this.dropItem(Item.STICK.id, 1);
             }
 
-            if (getArmourPoints() > 7 && this.rand.nextInt(2) == 0) {
-                this.dropItem(ItemBase.leather.id, 1);
+            if (this.armorPoints > 7 && this.rand.nextInt(2) == 0) {
+                this.dropItem(Item.LEATHER.id, 1);
             }
 
-            if (getRocks() > 7 && this.rand.nextInt(2) == 0) {
-                this.dropItem(BlockBase.GRAVEL.id, 1);
-            }
-
-            if (this.smokeStock > 1 && this.rand.nextInt(2) == 0) {
-                this.dropItem(ItemBase.redstoneDust.id, 1);
-            }
-
-            if (this.gooStock > 1 && this.rand.nextInt(2) == 0) {
-                this.dropItem(ItemBase.slimeball.id, 1);
+            if (this.rocks > 7 && this.rand.nextInt(2) == 0) {
+                this.dropItem(Block.GRAVEL.id, 1);
             }
 
             if (this.smokeStock > 1 && this.rand.nextInt(2) == 0) {
-                this.dropItem(ItemBase.redstoneDust.id, 1);
+                this.dropItem(Item.REDSTONE_DUST.id, 1);
             }
 
             if (this.gooStock > 1 && this.rand.nextInt(2) == 0) {
-                this.dropItem(ItemBase.slimeball.id, 1);
+                this.dropItem(Item.SLIMEBALL.id, 1);
             }
 
-            if (isGlowing() && this.rand.nextInt(2) == 0) {
-                this.dropItem(ItemBase.glowstoneDust.id, 1);
+            if (this.smokeStock > 1 && this.rand.nextInt(2) == 0) {
+                this.dropItem(Item.REDSTONE_DUST.id, 1);
             }
 
-            if (hasCrown()) {
-                this.dropItem(ItemBase.goldIngot.id, 1);
+            if (this.gooStock > 1 && this.rand.nextInt(2) == 0) {
+                this.dropItem(Item.SLIMEBALL.id, 1);
+            }
+
+            if (this.glowing && this.rand.nextInt(2) == 0) {
+                this.dropItem(Item.GLOWSTONE_DUST.id, 1);
+            }
+
+            if (this.king) {
+                this.dropItem(Item.GOLD_INGOT.id, 1);
             }
 
             if (this.heavyCore) {
-                this.dropItem(ItemBase.ironIngot.id, 1);
+                this.dropItem(Item.IRON_INGOT.id, 1);
             }
 
-            if (getLogs() > 0) {
+            if (this.logs > 0) {
                 this.dropLogs();
             }
         }
 
     }
 
-    @Override
-    public boolean damage(EntityBase e, int i) {
+    public boolean damage(Entity e, int i) {
         if (this.vehicle != null && i < 100 && this.rand.nextInt(2) == 0) {
-            // attackEntityFrom -> damage
             return this.vehicle.damage(e, i);
         } else {
-            if (e != null && e instanceof EntityClayMan) {
-                EntityClayMan james = (EntityClayMan)e;
+            if (e != null && e instanceof EntityClayMan james) {
                 if (james.clayTeam == this.clayTeam) {
                     return false;
                 }
 
-                if (getLogs() > 0) {
+                if (this.logs > 0) {
                     this.dropLogs();
                 }
 
@@ -1583,13 +1485,13 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
                     this.entity = e;
                 }
 
-                if (getArmourPoints() > 0) {
+                if (this.armorPoints > 0) {
                     i /= 2;
-                    if (isPadded()) {
+                    if (this.armorPadded) {
                         --i;
                     }
 
-                    setArmourPoints(getArmourPoints()-1);
+                    --this.armorPoints;
                     if (i < 0) {
                         i = 0;
                     }
@@ -1600,51 +1502,51 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
                     double a;
                     double b;
                     double c;
-                    if ((james.smokeStock <= 0 || this.smokeTime <= 0 || this.rand.nextInt(2) == 0) && james.gooStock > 0 && getGooTime() <= 0 && this.onGround) {
+                    if ((james.smokeStock <= 0 || this.smokeTime <= 0 || this.rand.nextInt(2) == 0) && james.gooStock > 0 && this.gooTime <= 0 && this.onGround) {
                         --james.gooStock;
-                        setGooTime(150);
-                        this.level.playSound(this, "mob.slimeattack", 0.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+                        this.gooTime = 150;
+                        this.world.playSound(this, "mob.slimeattack", 0.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
 
-                        for(j = 0; j < 4; ++j) {
-                            a = this.x + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                            b = this.boundingBox.minY + 0.125D + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                            c = this.z + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                            this.level.addParticle("slime", a, b, c, 0.0D, 0.1D, 0.0D);
+                        for (j = 0; j < 4; ++j) {
+                            a = this.x + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                            b = this.boundingBox.minY + 0.125 + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                            c = this.z + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                            this.world.addParticle("slime", a, b, c, 0.0, 0.1, 0.0);
                         }
 
-                        this.velocityX = 0.0D;
-                        this.velocityY = 0.0D;
-                        this.velocityZ = 0.0D;
-                        this.field_1029 = 0.0F;
-                        this.field_1060 = 0.0F;
+                        this.xVelocity = 0.0;
+                        this.yVelocity = 0.0;
+                        this.zVelocity = 0.0;
+                        this.forwardVelocity = 0.0F;
+                        this.horizontalVelocity = 0.0F;
                         this.jumping = false;
                     } else if (james.smokeStock > 0 && this.smokeTime <= 0) {
                         --james.smokeStock;
                         this.smokeTime = 100;
-                        this.level.playSound(this, "random.fizz", 0.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+                        this.world.playSound(this, "random.fizz", 0.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
 
-                        for(j = 0; j < 8; ++j) {
-                            a = this.x + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                            b = this.boundingBox.minY + 0.25D + (double)this.rand.nextFloat() * 0.25D;
-                            c = this.z + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                            this.level.addParticle("reddust", a, b, c, 0.0D, 0.1D, 0.0D);
+                        for (j = 0; j < 8; ++j) {
+                            a = this.x + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                            b = this.boundingBox.minY + 0.25 + (double) this.rand.nextFloat() * 0.25;
+                            c = this.z + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                            this.world.addParticle("reddust", a, b, c, 0.0, 0.1, 0.0);
                         }
 
                         this.targetFollow = null;
                         this.entity = null;
-                        this.setTarget((class_61)null);
+                        this.setTarget(null);
                     }
                 }
             } else {
                 i = 20;
-                if (e instanceof FishHook) {
+                if (e instanceof FishHookEntity) {
                     return false;
                 }
             }
 
             boolean fred = super.damage(e, i);
             if (fred && this.health <= 0) {
-                ItemBase item1 = ItemListener.greyDoll.asItem();
+                Item item1 = ItemListener.greyDoll.asItem();
                 if (this.clayTeam == 1) {
                     item1 = ItemListener.redDoll.asItem();
                 } else if (this.clayTeam == 2) {
@@ -1659,20 +1561,20 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
                     item1 = ItemListener.purpleDoll.asItem();
                 }
 
-                for(int q = 0; q < 24; ++q) {
-                    double a = this.x + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                    double b = this.y + 0.25D + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                    double c = this.z + (double)(this.rand.nextFloat() - this.rand.nextFloat()) * 0.125D;
-                    //todo: ModLoader.getMinecraftInstance().effectRenderer.addEffect(new EntitySlimeFX(this.worldObj, a, b, c, item1));
+                for (int q = 0; q < 24; ++q) {
+                    double a = this.x + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                    double b = this.y + 0.25 + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                    double c = this.z + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                    ClientUtil.addPoofParticle(this.world, a, b, c, item1);
                 }
 
                 this.removed = true;
-                if (e != null && e instanceof PlayerBase) {
+                if (e != null && e instanceof PlayerEntity) {
                     this.killedByPlayer = e;
                 }
 
-                if (isGunpowdered()) {
-                    this.level.createExplosion((EntityBase) null, this.x, this.y, this.z, 1.0F);
+                if (this.gunpowdered) {
+                    this.world.createExplosion(null, this.x, this.y, this.z, 1.0F);
                 }
             }
 
@@ -1680,72 +1582,63 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
         }
     }
 
-    @Override
     public void accelerate(double d, double d1, double d2) {
-        if (getGooTime() <= 0) {
-            this.velocityX += d;
-            this.velocityY += d1;
-            this.velocityZ += d2;
+        if (this.gooTime <= 0) {
+            this.xVelocity += d;
+            this.yVelocity += d1;
+            this.zVelocity += d2;
         }
     }
 
-    @Override
-    public void method_925(EntityBase entity, int i, double d, double d1) {
-        if (getGooTime() <= 0) {
-            // knockback -> method_925
+    public void method_925(Entity entity, int i, double d, double d1) {
+        if (this.gooTime <= 0) {
             super.method_925(entity, i, d, d1);
-            if (entity != null && entity instanceof EntityClayMan) {
-                EntityClayMan ec = (EntityClayMan)entity;
+            if (entity != null && entity instanceof EntityClayMan ec) {
                 if ((!ec.heavyCore || !this.heavyCore) && (ec.heavyCore || this.heavyCore)) {
                     if (!ec.heavyCore && this.heavyCore) {
-                        this.velocityX *= 0.2D;
-                        this.velocityY *= 0.4D;
-                        this.velocityZ *= 0.2D;
+                        this.xVelocity *= 0.2;
+                        this.yVelocity *= 0.4;
+                        this.zVelocity *= 0.2;
                     } else {
-                        this.velocityX *= 1.5D;
-                        this.velocityZ *= 1.5D;
+                        this.xVelocity *= 1.5;
+                        this.zVelocity *= 1.5;
                     }
                 } else {
-                    this.velocityX *= 0.6D;
-                    this.velocityY *= 0.75D;
-                    this.velocityZ *= 0.6D;
+                    this.xVelocity *= 0.6;
+                    this.yVelocity *= 0.75;
+                    this.zVelocity *= 0.6;
                 }
             } else if (entity != null && entity instanceof EntityGravelChunk) {
-                this.velocityX *= 0.6D;
-                this.velocityY *= 0.75D;
-                this.velocityZ *= 0.6D;
+                this.xVelocity *= 0.6;
+                this.yVelocity *= 0.75;
+                this.zVelocity *= 0.6;
             }
 
         }
     }
 
     // scope needed for horse
-    public boolean isJumping()
-    {
+    public boolean isJumping() {
         return jumping;
     }
-    public void setJumping(boolean j)
-    {
+
+    public void setJumping(boolean j) {
         jumping = j;
     }
 
-    public float getMoveForward()
-    {
-        return field_1029;
+    public float getForwardVelocity() {
+        return forwardVelocity;
     }
 
-    public float getMoveStrafe()
-    {
-        return field_1060;
+    public float getHorizontalVelocity() {
+        return horizontalVelocity;
     }
 
-    public float getFallDistance()
-    {
+    public float getFallDistance() {
         return fallDistance;
     }
 
-    public void setFallDistance(float f)
-    {
+    public void setFallDistance(float f) {
         fallDistance = f;
     }
 
@@ -1755,8 +1648,7 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
     }
 
     @Override
-    public void writeToMessage(Message message)
-    {
+    public void writeToMessage(Message message) {
         // message.ints.length is 4, so let's add a fifth
         int[] newInts = Arrays.copyOf(message.ints, message.ints.length + 1);
         newInts[newInts.length - 1] = clayTeam;
@@ -1764,8 +1656,7 @@ public class EntityClayMan extends AnimalBase implements MobSpawnDataProvider {
     }
 
     @Override
-    public void readFromMessage(Message message)
-    {
+    public void readFromMessage(Message message) {
         clayTeam = message.ints[4];
         this.texture = clayManTexture(clayTeam);
     }

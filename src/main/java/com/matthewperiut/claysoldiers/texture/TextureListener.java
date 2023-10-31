@@ -8,14 +8,12 @@ import net.modificationstation.stationapi.api.registry.Identifier;
 import net.modificationstation.stationapi.api.registry.ModID;
 import net.modificationstation.stationapi.api.util.Null;
 
-public class TextureListener
-{
+public class TextureListener {
     @Entrypoint.ModID
     public static final ModID MOD_ID = Null.get();
 
     @EventListener
-    public void registerTextures(TextureRegisterEvent event)
-    {
+    public void registerTextures(TextureRegisterEvent event) {
         ItemListener.clayDisruptor.setTexture(Identifier.of(MOD_ID, "item/disruptor"));
         ItemListener.greyDoll.setTexture(Identifier.of(MOD_ID, "item/dollGrey"));
         ItemListener.redDoll.setTexture(Identifier.of(MOD_ID, "item/dollRed"));

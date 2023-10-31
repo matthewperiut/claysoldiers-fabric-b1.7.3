@@ -1,19 +1,18 @@
 package com.matthewperiut.claysoldiers.item;
 
 import net.mine_diver.unsafeevents.listener.EventListener;
-import net.minecraft.item.ItemBase;
+import net.minecraft.item.Item;
 import net.modificationstation.stationapi.api.event.registry.ItemRegistryEvent;
 import net.modificationstation.stationapi.api.mod.entrypoint.Entrypoint;
 import net.modificationstation.stationapi.api.registry.Identifier;
 import net.modificationstation.stationapi.api.registry.ModID;
 import net.modificationstation.stationapi.api.util.Null;
 
-public class ItemListener
-{
+public class ItemListener {
     @Entrypoint.ModID
     public static final ModID MOD_ID = Null.get();
 
-    public static ItemBase
+    public static Item
             clayDisruptor,
             greyDoll,
             redDoll,
@@ -25,8 +24,7 @@ public class ItemListener
             horseDoll;
 
     @EventListener
-    public void registerItems(ItemRegistryEvent event)
-    {
+    public void registerItems(ItemRegistryEvent event) {
         clayDisruptor = new ItemClayDisruptor(Identifier.of(MOD_ID, "claydisruptor")).setTranslationKey(MOD_ID, "claydisruptor");
 
         greyDoll = new ItemClayMan(Identifier.of(MOD_ID, "claydoll"), 0).setTranslationKey(MOD_ID, "claydoll");

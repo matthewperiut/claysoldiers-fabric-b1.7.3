@@ -13,8 +13,7 @@ import net.modificationstation.stationapi.api.util.Null;
 
 import static net.modificationstation.stationapi.api.registry.Identifier.of;
 
-public class EntityListener
-{
+public class EntityListener {
     @Entrypoint.ModID
     public static final ModID MOD_ID = Null.get();
 

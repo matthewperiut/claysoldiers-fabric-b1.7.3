@@ -1,10 +1,10 @@
 package com.matthewperiut.claysoldiers.client.model;
 
 import net.minecraft.client.model.Cuboid;
-import net.minecraft.client.render.entity.model.EntityModelBase;
-import net.minecraft.util.maths.MathHelper;
+import net.minecraft.client.render.entity.model.BipedEntityModel;
+import net.minecraft.util.math.MathHelper;
 
-public class ModelDirtHorse extends EntityModelBase {
+public class ModelDirtHorse extends BipedEntityModel {
 
     public Cuboid bipedEar1;
     public Cuboid bipedEar2;
@@ -67,17 +67,17 @@ public class ModelDirtHorse extends EntityModelBase {
 
     public void render(float f, float f1, float f2, float f3, float f4, float f5) {
         this.setRotationAngles(f, f1, f2, f3, f4, f5);
-        this.head.method_1815(f5);
-        this.body.method_1815(f5);
-        this.leg1.method_1815(f5);
-        this.leg2.method_1815(f5);
-        this.leg3.method_1815(f5);
-        this.leg4.method_1815(f5);
-        this.bipedNeck.method_1815(f5);
-        this.bipedMane.method_1815(f5);
-        this.bipedTail.method_1815(f5);
-        this.bipedEar1.method_1815(f5);
-        this.bipedEar2.method_1815(f5);
+        this.head.render(f5);
+        this.body.render(f5);
+        this.leg1.render(f5);
+        this.leg2.render(f5);
+        this.leg3.render(f5);
+        this.leg4.render(f5);
+        this.bipedNeck.render(f5);
+        this.bipedMane.render(f5);
+        this.bipedTail.render(f5);
+        this.bipedEar1.render(f5);
+        this.bipedEar2.render(f5);
     }
 
     public void setRotationAngles(float limbSwing, float limbSwingAmount, float rotFloat, float rotYaw, float rotPitch, float partTicks) {
