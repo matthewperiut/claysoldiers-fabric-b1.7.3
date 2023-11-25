@@ -4,7 +4,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.particle.DiggingParticleEntity;
 import net.minecraft.client.entity.particle.ParticleEntity;
 import net.minecraft.client.entity.particle.PoofParticleEntity;
@@ -26,7 +25,7 @@ public class ClientUtil {
 
     @Environment(EnvType.CLIENT)
     private static void addParticleClient(ParticleEntity entity) {
-        ((Minecraft) FabricLoader.getInstance().getGameInstance()).particleManager.addParticle(entity);
+        // todo: ((Minecraft) FabricLoader.getInstance().getGameInstance()).particleManager.addParticle(entity);
     }
 
     @Environment(EnvType.CLIENT)

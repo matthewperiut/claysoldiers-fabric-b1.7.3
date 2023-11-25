@@ -16,16 +16,15 @@ import net.minecraft.item.food.FoodItem;
 import net.minecraft.util.io.CompoundTag;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.modificationstation.stationapi.api.packet.Message;
-import net.modificationstation.stationapi.api.registry.Identifier;
+import net.modificationstation.stationapi.api.network.packet.MessagePacket;
 import net.modificationstation.stationapi.api.server.entity.HasTrackingParameters;
 import net.modificationstation.stationapi.api.server.entity.MobSpawnDataProvider;
+import net.modificationstation.stationapi.api.util.Identifier;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static com.matthewperiut.claysoldiers.ClaySoldiersMod.MODID;
-import static net.modificationstation.stationapi.api.registry.Identifier.of;
 
 @HasTrackingParameters(trackingDistance = 160, updatePeriod = 2)
 public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataProvider {
@@ -1644,11 +1643,11 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
 
     @Override
     public Identifier getHandlerIdentifier() {
-        return of(MODID, "claysoldier");
+        return Identifier.of(MODID, "claysoldier");
     }
 
     @Override
-    public void writeToMessage(Message message) {
+    public void writeToMessage(MessagePacket message) {
         // message.ints.length is 4, so let's add a fifth
         int[] newInts = Arrays.copyOf(message.ints, message.ints.length + 1);
         newInts[newInts.length - 1] = clayTeam;
@@ -1656,7 +1655,7 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
     }
 
     @Override
-    public void readFromMessage(Message message) {
+    public void readFromMessage(MessagePacket message) {
         clayTeam = message.ints[4];
         this.texture = clayManTexture(clayTeam);
     }

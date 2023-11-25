@@ -2,7 +2,7 @@ package com.matthewperiut.claysoldiers.item;
 
 import com.matthewperiut.claysoldiers.entity.behavior.EntityDirtHorse;
 import net.minecraft.world.World;
-import net.modificationstation.stationapi.api.registry.Identifier;
+import net.modificationstation.stationapi.api.util.Identifier;
 
 public class ItemDirtHorse extends ItemClayMan {
     public ItemDirtHorse(Identifier identifier) {

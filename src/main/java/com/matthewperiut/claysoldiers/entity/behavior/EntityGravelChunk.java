@@ -14,14 +14,13 @@ import net.minecraft.util.math.AxixAlignedBoundingBox;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.modificationstation.stationapi.api.registry.Identifier;
 import net.modificationstation.stationapi.api.server.entity.HasTrackingParameters;
 import net.modificationstation.stationapi.api.server.entity.MobSpawnDataProvider;
+import net.modificationstation.stationapi.api.util.Identifier;
 
 import java.util.List;
 
 import static com.matthewperiut.claysoldiers.ClaySoldiersMod.MODID;
-import static net.modificationstation.stationapi.api.registry.Identifier.of;
 
 @HasTrackingParameters(trackingDistance = 160, updatePeriod = 2)
 public class EntityGravelChunk extends Entity implements MobSpawnDataProvider {
@@ -316,5 +315,5 @@ public class EntityGravelChunk extends Entity implements MobSpawnDataProvider {
     }
 
     @Getter
-    private final Identifier handlerIdentifier = of(MODID, "gravelchunk");
+    private final Identifier handlerIdentifier = Identifier.of(MODID, "gravelchunk");
 }

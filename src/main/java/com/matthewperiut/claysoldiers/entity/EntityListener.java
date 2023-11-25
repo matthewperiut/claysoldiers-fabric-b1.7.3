@@ -7,15 +7,14 @@ import net.mine_diver.unsafeevents.listener.EventListener;
 import net.modificationstation.stationapi.api.event.entity.EntityRegister;
 import net.modificationstation.stationapi.api.event.registry.MobHandlerRegistryEvent;
 import net.modificationstation.stationapi.api.mod.entrypoint.Entrypoint;
-import net.modificationstation.stationapi.api.registry.ModID;
 import net.modificationstation.stationapi.api.registry.Registry;
+import net.modificationstation.stationapi.api.util.Identifier;
+import net.modificationstation.stationapi.api.util.Namespace;
 import net.modificationstation.stationapi.api.util.Null;
 
-import static net.modificationstation.stationapi.api.registry.Identifier.of;
-
 public class EntityListener {
-    @Entrypoint.ModID
-    public static final ModID MOD_ID = Null.get();
+    @Entrypoint.Namespace
+    public static final Namespace MOD_ID = Null.get();
 
     @EventListener
     public void registerEntities(EntityRegister event) {
@@ -26,7 +25,7 @@ public class EntityListener {
 
     @EventListener
     public void registerMobHandlers(MobHandlerRegistryEvent event) {
-        Registry.register(event.registry, of(MOD_ID, "claysoldier"), EntityClayMan::new);
-        Registry.register(event.registry, of(MOD_ID, "dirthorse"), EntityDirtHorse::new);
+        Registry.register(event.registry, Identifier.of(MOD_ID, "claysoldier"), EntityClayMan::new);
+        Registry.register(event.registry, Identifier.of(MOD_ID, "dirthorse"), EntityDirtHorse::new);
     }
 }

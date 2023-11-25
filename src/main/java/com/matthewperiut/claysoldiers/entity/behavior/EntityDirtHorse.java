@@ -9,14 +9,13 @@ import net.minecraft.item.Item;
 import net.minecraft.util.io.CompoundTag;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.modificationstation.stationapi.api.registry.Identifier;
 import net.modificationstation.stationapi.api.server.entity.HasTrackingParameters;
 import net.modificationstation.stationapi.api.server.entity.MobSpawnDataProvider;
+import net.modificationstation.stationapi.api.util.Identifier;
 
 import java.util.List;
 
 import static com.matthewperiut.claysoldiers.ClaySoldiersMod.MODID;
-import static net.modificationstation.stationapi.api.registry.Identifier.of;
 
 @HasTrackingParameters(trackingDistance = 160, updatePeriod = 2)
 public class EntityDirtHorse extends AbstractAnimalEntity implements MobSpawnDataProvider {
@@ -175,6 +174,6 @@ public class EntityDirtHorse extends AbstractAnimalEntity implements MobSpawnDat
 
     @Override
     public Identifier getHandlerIdentifier() {
-        return of(MODID, "dirthorse");
+        return Identifier.of(MODID, "dirthorse");
     }
 }
