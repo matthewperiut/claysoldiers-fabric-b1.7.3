@@ -76,12 +76,20 @@ dependencies {
     modImplementation "babric:fabric-loader:${project.loader_version}"
 
     implementation "org.slf4j:slf4j-api:1.8.0-beta4"
-    implementation "org.apache.logging.log4j:log4j-slf4j18-impl:2.16.0"
+    implementation 'org.apache.logging.log4j:log4j-slf4j18-impl:2.17.2'
+    implementation("io.github.llamalad7:mixinextras-fabric:${mixinextras_version}")
+    annotationProcessor("io.github.llamalad7:mixinextras-fabric:${mixinextras_version}")
+    implementation "blue.endless:jankson:1.2.1"
+    implementation 'com.google.guava:guava:33.2.1-jre'
+
     modImplementation("net.modificationstation:StationAPI:${project.stapi_version}")
+    modImplementation("net.glasslauncher.mods:GlassConfigAPI:${project.gcapi_version}") { transitive false }
 
     modImplementation("com.github.matthewperiut:spc-babric:${project.spc_version}") {
         transitive false
     }
+
+    modRuntimeOnly ("net.glasslauncher:HowManyItems-Fabric-Unofficial:${project.howmanyitems_version}") {transitive false }
 /*
     modLocalRuntime("com.github.calmilamsy:ModMenu:${project.modmenu_version}") {
         transitive false
