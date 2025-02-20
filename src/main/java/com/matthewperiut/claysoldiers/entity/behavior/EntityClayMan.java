@@ -1,19 +1,23 @@
 package com.matthewperiut.claysoldiers.entity.behavior;
 
+import com.matthewperiut.claysoldiers.entity.EntityListener;
 import com.matthewperiut.claysoldiers.item.ItemClayMan;
 import com.matthewperiut.claysoldiers.item.ItemListener;
 import com.matthewperiut.claysoldiers.util.ClientUtil;
 import net.minecraft.block.Block;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.*;
-import net.minecraft.entity.ai.pathing.EntityPath;
-import net.minecraft.entity.block.ChestBlockEntity;
-import net.minecraft.entity.monster.MonsterEntity;
+import net.minecraft.entity.ai.pathing.Path;
+import net.minecraft.entity.mob.MonsterEntity;
+import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.FishingBobberEntity;
+import net.minecraft.item.FoodItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.food.FoodItem;
-import net.minecraft.util.io.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.modificationstation.stationapi.api.network.packet.MessagePacket;
@@ -24,10 +28,8 @@ import net.modificationstation.stationapi.api.util.Identifier;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.matthewperiut.claysoldiers.ClaySoldiersMod.MODID;
-
 @HasTrackingParameters(trackingDistance = 160, updatePeriod = 2)
-public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataProvider {
+public class EntityClayMan extends AnimalEntity implements MobSpawnDataProvider {
     public int clayTeam;
     public int weaponPoints;
     public int armorPoints;
@@ -64,9 +66,9 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
         this.health = 20;
         this.clayTeam = 0;
         this.standingEyeHeight = 0.0F;
-        this.field_1641 = 0.1F;
+        this.stepHeight = 0.1F;
         this.movementSpeed = 0.3F;
-        this.setSize(0.15F, 0.4F);
+        this.setBoundingBoxSpacing(0.15F, 0.4F);
         this.setPosition(this.x, this.y, this.z);
         this.texture = this.clayManTexture(0);
         this.renderDistanceMultiplier = 5.0;
@@ -77,13 +79,13 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
         this.health = 20;
         this.clayTeam = i;
         this.standingEyeHeight = 0.0F;
-        this.field_1641 = 0.1F;
+        this.stepHeight = 0.1F;
         this.movementSpeed = 0.3F;
-        this.setSize(0.15F, 0.4F);
+        this.setBoundingBoxSpacing(0.15F, 0.4F);
         this.setPosition(x, y, z);
         this.texture = this.clayManTexture(i);
         this.renderDistanceMultiplier = 5.0;
-        this.world.playSound(this, "step.gravel", 0.8F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F) * 0.9F);
+        this.world.playSound(this, "step.gravel", 0.8F, ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F) * 0.9F);
     }
 
     public String clayManTexture(int i) {
@@ -140,20 +142,20 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
     }
 
     @Override
-    public void tickHandSwing() {
-        super.tickHandSwing();
+    public void tickLiving() {
+        super.tickLiving();
         if (this.strikeTime > 0) {
             --this.strikeTime;
         }
 
         if (this.sugarTime > 0) {
-            this.movementSpeed = 0.6F + (this.entity == null && this.targetFollow == null ? 0.0F : 0.15F);
+            this.movementSpeed = 0.6F + (this.target == null && this.targetFollow == null ? 0.0F : 0.15F);
             --this.sugarTime;
         } else {
-            this.movementSpeed = 0.3F + (this.entity == null && this.targetFollow == null ? 0.0F : 0.15F);
+            this.movementSpeed = 0.3F + (this.target == null && this.targetFollow == null ? 0.0F : 0.15F);
         }
 
-        if (this.method_1393()) {
+        if (this.checkWaterCollisions()) {
             this.jumping = true;
         }
 
@@ -162,9 +164,9 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
         double aaa;
         if (this.foodLeft > 0 && this.health <= 15 && this.health > 0) {
             for (i = 0; i < 12; ++i) {
-                frogman = this.x + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
-                double b = this.y + 0.25 + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
-                aaa = this.z + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                frogman = this.x + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
+                double b = this.y + 0.25 + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
+                aaa = this.z + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
                 ClientUtil.addPoofParticle(this.world, frogman, b, aaa, Item.RAW_PORKCHOP);
             }
 
@@ -186,11 +188,11 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
 
         if (this.gooTime > 0) {
             int j;
-            this.xVelocity = 0.0;
-            this.yVelocity = 0.0;
-            this.zVelocity = 0.0;
-            this.forwardVelocity = 0.0F;
-            this.horizontalVelocity = 0.0F;
+            this.velocityX = 0.0;
+            this.velocityY = 0.0;
+            this.velocityZ = 0.0;
+            this.forwardSpeed = 0.0F;
+            this.sidewaysSpeed = 0.0F;
             this.jumping = false;
             this.movementSpeed = 0.0F;
             --this.gooTime;
@@ -198,7 +200,7 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
             j = MathHelper.floor(this.boundingBox.minY - 1.0);
             int k = MathHelper.floor(this.z);
             j = this.world.getBlockId(i, j, k);
-            if (j > 0 && j < 128 && (j == 0 || Block.BY_ID[j].getCollisionShape(this.world, i, j, k) == null)) {
+            if (j > 0 && j < 128 && (j == 0 || Block.BLOCKS[j].getCollisionShape(this.world, i, j, k) == null)) {
                 this.gooTime = 0;
             }
         }
@@ -208,23 +210,23 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
         }
 
         ++this.entCount;
-        if (this.entity != null && this.entity.removed) {
-            this.entity = null;
-            this.setTarget(null);
-        } else if (this.entity != null && this.rand.nextInt(25) == 0 && ((double) this.distanceTo(this.entity) > 8.0 || !this.method_928(this.entity))) {
-            this.entity = null;
-            this.setTarget(null);
+        if (this.target != null && this.target.dead) {
+            this.target = null;
+            this.setPath(null);
+        } else if (this.target != null && this.random.nextInt(25) == 0 && ((double) this.getDistance(this.target) > 8.0 || !this.canSee(this.target))) {
+            this.target = null;
+            this.setPath(null);
         }
 
-        if (this.targetFollow != null && this.targetFollow.removed) {
+        if (this.targetFollow != null && this.targetFollow.dead) {
             this.targetFollow = null;
-            this.setTarget(null);
-        } else if (this.targetFollow != null && this.rand.nextInt(25) == 0 && ((double) this.distanceTo(this.targetFollow) > 8.0 || !this.method_928(this.targetFollow))) {
+            this.setPath(null);
+        } else if (this.targetFollow != null && this.random.nextInt(25) == 0 && ((double) this.getDistance(this.targetFollow) > 8.0 || !this.canSee(this.targetFollow))) {
             this.targetFollow = null;
-            this.setTarget(null);
+            this.setPath(null);
         }
 
-        if (this.smokeTime <= 0 && this.entCount > 2 + this.rand.nextInt(2) && this.health > 0) {
+        if (this.smokeTime <= 0 && this.entCount > 2 + this.random.nextInt(2) && this.health > 0) {
             this.entCount = 0;
             List list = this.world.getEntities(this, this.boundingBox.expand(8.0, 5.0, 8.0));
 
@@ -232,45 +234,45 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
             for (int j = 0; j < list.size(); ++j) {
                 Entity entity = (Entity) list.get(j);
                 // method_928 is something like this entity can see them
-                if (entity instanceof EntityClayMan && this.rand.nextInt(3) == 0 && this.method_928(entity)) {
+                if (entity instanceof EntityClayMan && this.random.nextInt(3) == 0 && this.canSee(entity)) {
                     EntityClayMan clayman = (EntityClayMan) entity;
                     if (clayman.health > 0 && clayman.clayTeam != this.clayTeam && this.clayTeam > 0 && this.logs <= 0) {
                         if (clayman.king) {
-                            if (this.entity == null || !(this.entity instanceof EntityClayMan)) {
-                                this.entity = clayman;
+                            if (this.target == null || !(this.target instanceof EntityClayMan)) {
+                                this.target = clayman;
                                 break;
                             }
 
-                            ec = (EntityClayMan) this.entity;
+                            ec = (EntityClayMan) this.target;
                             if (!ec.king) {
-                                this.entity = clayman;
+                                this.target = clayman;
                                 break;
                             }
-                        } else if (this.entity == null) {
-                            this.entity = clayman;
+                        } else if (this.target == null) {
+                            this.target = clayman;
                             break;
                         }
-                    } else if (clayman.health > 0 && this.targetFollow == null && this.entity == null && clayman.king && clayman.clayTeam == this.clayTeam && (double) this.distanceTo(clayman) > 3.0) {
+                    } else if (clayman.health > 0 && this.targetFollow == null && this.target == null && clayman.king && clayman.clayTeam == this.clayTeam && (double) this.getDistance(clayman) > 3.0) {
                         this.targetFollow = clayman;
                         break;
                     }
-                } else if (this.entity == null && entity instanceof MonsterEntity mob && this.method_928(entity)) {
-                    if (mob.method_634() != null) {
-                        this.entity = mob;
+                } else if (this.target == null && entity instanceof MonsterEntity mob && this.canSee(entity)) {
+                    if (mob.getTarget() != null) {
+                        this.target = mob;
                         break;
                     }
                 } else {
-                    if (this.entity == null && this.targetFollow == null && !this.heavyCore && this.logs <= 0 && this.vehicle == null && entity instanceof EntityDirtHorse && entity.passenger == null && this.method_928(entity)) {
+                    if (this.target == null && this.targetFollow == null && !this.heavyCore && this.logs <= 0 && this.vehicle == null && entity instanceof EntityDirtHorse && entity.passenger == null && this.canSee(entity)) {
                         this.targetFollow = entity;
                         break;
                     }
 
-                    if (this.entity == null && this.targetFollow == null && entity instanceof FishHookEntity && this.method_928(entity)) {
+                    if (this.target == null && this.targetFollow == null && entity instanceof FishingBobberEntity && this.canSee(entity)) {
                         this.targetFollow = entity;
                         break;
                     }
 
-                    if (this.entity == null && (this.targetFollow == null || this.targetFollow instanceof EntityClayMan) && entity instanceof ItemEntity item && this.method_928(entity)) {
+                    if (this.target == null && (this.targetFollow == null || this.targetFollow instanceof EntityClayMan) && entity instanceof ItemEntity item && this.canSee(entity)) {
                         if (item.stack != null) {
                             ItemStack stack = item.stack;
                             if (stack.count > 0) {
@@ -338,7 +340,7 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
                                         break;
                                     }
 
-                                    if (this.smokeStock <= 0 && stack.itemId == Item.REDSTONE_DUST.id) {
+                                    if (this.smokeStock <= 0 && stack.itemId == Item.REDSTONE.id) {
                                         this.targetFollow = item;
                                         break;
                                     }
@@ -364,7 +366,7 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
                                             break;
                                         }
                                     } else {
-                                        if (stack.itemId == Item.DYE_POWDER.id && stack.getMeta() == this.teamDye(this.clayTeam)) {
+                                        if (stack.itemId == Item.DYE.id && stack.getDamage() == this.teamDye(this.clayTeam)) {
                                             this.targetFollow = item;
                                             break;
                                         }
@@ -388,27 +390,27 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
                 }
             }
 
-            if (this.entity != null) {
-                if (this.strikeTime <= 0 && this.method_928(this.entity) && (double) this.distanceTo(this.entity) < (this.weaponPoints > 0 ? 1.0 : 0.7) + (double) this.rand.nextFloat() * 0.1) {
-                    if (this.hitTargetMakesDead(this.entity)) {
-                        this.entity = null;
-                        this.setTarget(null);
+            if (this.target != null) {
+                if (this.strikeTime <= 0 && this.canSee(this.target) && (double) this.getDistance(this.target) < (this.weaponPoints > 0 ? 1.0 : 0.7) + (double) this.random.nextFloat() * 0.1) {
+                    if (this.hitTargetMakesDead(this.target)) {
+                        this.target = null;
+                        this.setPath(null);
                     }
-                } else if (this.rocks > 0 && this.throwTime <= 0 && this.method_928(this.entity)) {
-                    frogman = this.distanceTo(this.entity);
+                } else if (this.rocks > 0 && this.throwTime <= 0 && this.canSee(this.target)) {
+                    frogman = this.getDistance(this.target);
                     if (frogman >= 1.75 && frogman <= 7.0) {
                         --this.rocks;
                         this.throwTime = 20;
-                        this.throwRockAtEnemy(this.entity);
+                        this.throwRockAtEnemy(this.target);
                     }
                 }
             } else if (this.targetFollow != null) {
-                if (!this.method_633() || this.rand.nextInt(10) == 0) {
-                    this.setTarget(this.world.findPathTo(this.targetFollow, this, 16.0F));
+                if (!this.hasPath() || this.random.nextInt(10) == 0) {
+                    this.setPath(this.world.findPath(this.targetFollow, this, 16.0F));
                 }
 
                 if (this.targetFollow instanceof ItemEntity item) {
-                    if (item.stack != null && this.method_928(item) && (double) this.distanceTo(item) < 0.75) {
+                    if (item.stack != null && this.canSee(item) && (double) this.getDistance(item) < 0.75) {
                         ItemStack stack = item.stack;
                         if (stack.count > 0) {
                             if (stack.itemId == Item.STICK.id) {
@@ -442,10 +444,10 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
                                 if (!jack) {
                                     this.king = true;
                                     this.gotcha((ItemEntity) this.targetFollow);
-                                    item.remove();
+                                    item.markDead();
                                 } else {
                                     this.targetFollow = null;
-                                    this.setTarget(null);
+                                    this.setPath(null);
                                 }
                             } else if (stack.itemId == Item.GUNPOWDER.id) {
                                 this.gunpowdered = true;
@@ -459,7 +461,7 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
                             } else if (stack.itemId == Item.CLAY.id) {
                                 this.resPoints = 4;
                                 this.gotcha((ItemEntity) this.targetFollow);
-                            } else if (stack.itemId == Item.REDSTONE_DUST.id) {
+                            } else if (stack.itemId == Item.REDSTONE.id) {
                                 this.smokeStock = 2;
                                 this.gotcha((ItemEntity) this.targetFollow);
                             } else if (stack.itemId == Item.SLIMEBALL.id) {
@@ -477,13 +479,13 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
                                         this.stickSharp = true;
 
                                         for (int j = 0; j < 4; ++j) {
-                                            a = this.x + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
-                                            b = this.boundingBox.minY + 0.125 + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.25;
-                                            c = this.z + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
-                                            ClientUtil.addDiggingParticle(this.world, a, b, c, 0.0, 0.0, 0.0, Block.WOOD, 0, 0);
+                                            a = this.x + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
+                                            b = this.boundingBox.minY + 0.125 + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.25;
+                                            c = this.z + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
+                                            ClientUtil.addDiggingParticle(this.world, a, b, c, 0.0, 0.0, 0.0, Block.PLANKS, 0, 0);
                                         }
 
-                                        this.world.playSound(this, "random.wood click", 0.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+                                        this.world.playSound(this, "random.wood click", 0.75F, 1.0F / (this.random.nextFloat() * 0.2F + 0.9F));
                                     }
 
                                     this.targetFollow = null;
@@ -492,19 +494,19 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
                                         this.armorPadded = true;
 
                                         for (int j = 0; j < 4; ++j) {
-                                            a = this.x + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
-                                            b = this.boundingBox.minY + 0.125 + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.25;
-                                            c = this.z + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                                            a = this.x + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
+                                            b = this.boundingBox.minY + 0.125 + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.25;
+                                            c = this.z + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
                                             ClientUtil.addDiggingParticle(this.world, a, b, c, 0.0, 0.0, 0.0, Block.WOOL, 0, 0);
                                         }
 
-                                        this.world.playSound(this, "step.cloth", 0.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+                                        this.world.playSound(this, "step.cloth", 0.75F, 1.0F / (this.random.nextFloat() * 0.2F + 0.9F));
                                     }
 
                                     this.targetFollow = null;
                                 } else if (stack.getItem() != null && stack.getItem() instanceof ItemClayMan) {
                                     this.swingArm();
-                                    this.world.playSound(item, "step.gravel", 0.8F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F) * 0.9F);
+                                    this.world.playSound(item, "step.gravel", 0.8F, ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F) * 0.9F);
                                     Item item1 = ItemListener.greyDoll.asItem();
                                     if (this.clayTeam == 1) {
                                         item1 = ItemListener.redDoll.asItem();
@@ -539,7 +541,7 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
                                     }
 
                                     if (gottam > 0) {
-                                        this.world.playSound(this, "random.pop", 0.2F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+                                        this.world.playSound(this, "random.pop", 0.2F, ((this.random.nextFloat() - this.random.nextFloat()) * 0.7F + 1.0F) * 2.0F);
                                         if (gottam == 1) {
                                             this.logs += 5;
                                             if (item.stack != null) {
@@ -549,45 +551,45 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
                                         }
 
                                         if (item.stack == null || item.stack.count <= 0) {
-                                            item.remove();
+                                            item.markDead();
                                         }
                                     }
 
-                                    this.setTarget(null);
+                                    this.setPath(null);
                                     this.targetFollow = null;
-                                } else if (stack.itemId == Item.DYE_POWDER.id) {
+                                } else if (stack.itemId == Item.DYE.id) {
                                     this.targetFollow = null;
                                 }
                             }
                         }
                     }
-                } else if (this.targetFollow instanceof EntityClayMan && (double) this.distanceTo(this.targetFollow) < 1.75) {
+                } else if (this.targetFollow instanceof EntityClayMan && (double) this.getDistance(this.targetFollow) < 1.75) {
                     this.targetFollow = null;
-                } else if (this.targetFollow instanceof FishHookEntity && (double) this.distanceTo(this.targetFollow) < 1.0) {
+                } else if (this.targetFollow instanceof FishingBobberEntity && (double) this.getDistance(this.targetFollow) < 1.0) {
                     this.targetFollow = null;
-                } else if (this.targetFollow instanceof EntityDirtHorse && (double) this.distanceTo(this.targetFollow) < 0.75 && this.gooTime <= 0) {
+                } else if (this.targetFollow instanceof EntityDirtHorse && (double) this.getDistance(this.targetFollow) < 0.75 && this.gooTime <= 0) {
                     if (this.vehicle == null && this.targetFollow.passenger == null && !this.heavyCore && this.logs <= 0) {
-                        this.startRiding(this.targetFollow);
-                        this.world.playSound(this, "step.gravel", 0.6F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+                        this.setVehicle(this.targetFollow);
+                        this.world.playSound(this, "step.gravel", 0.6F, 1.0F / (this.random.nextFloat() * 0.2F + 0.9F));
                     }
 
                     this.targetFollow = null;
                 }
             } else {
                 this.updateBlockFinder();
-                if (this.logs > 0 && this.rand.nextInt(16) == 0) {
+                if (this.logs > 0 && this.random.nextInt(16) == 0) {
                     this.updateBuildings();
                 }
             }
         }
 
         if (this.isSwinging) {
-            this.lastHandSwingProgress += 0.15F;
-            this.handSwingProgress += 0.15F;
-            if (this.lastHandSwingProgress > 1.0F || this.handSwingProgress > 1.0F) {
+            this.lastSwingAnimationProgress += 0.15F;
+            this.swingAnimationProgress += 0.15F;
+            if (this.lastSwingAnimationProgress > 1.0F || this.swingAnimationProgress > 1.0F) {
                 this.isSwinging = false;
-                this.lastHandSwingProgress = 0.0F;
-                this.handSwingProgress = 0.0F;
+                this.lastSwingAnimationProgress = 0.0F;
+                this.swingAnimationProgress = 0.0F;
             }
         }
 
@@ -605,10 +607,10 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
         int x = MathHelper.floor(this.x);
         int y = MathHelper.floor(this.boundingBox.minY);
         int z = MathHelper.floor(this.z);
-        if (this.blockX != 0 && this.blockY != 0 && this.blockZ != 0 && !this.method_633()) {
-            EntityPath emily = this.world.method_189(this, this.blockX, this.blockY, this.blockZ, 16.0F);
-            if (emily != null && this.rand.nextInt(5) != 0) {
-                this.setTarget(emily);
+        if (this.blockX != 0 && this.blockY != 0 && this.blockZ != 0 && !this.hasPath()) {
+            Path emily = this.world.findPath(this, this.blockX, this.blockY, this.blockZ, 16.0F);
+            if (emily != null && this.random.nextInt(5) != 0) {
+                this.setPath(emily);
             } else {
                 this.blockX = 0;
                 this.blockY = 0;
@@ -649,9 +651,9 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
                     break;
                 }
 
-                i = x + this.rand.nextInt(6) - this.rand.nextInt(6);
-                j = y + this.rand.nextInt(3) - this.rand.nextInt(3);
-                k = z + this.rand.nextInt(6) - this.rand.nextInt(6);
+                i = x + this.random.nextInt(6) - this.random.nextInt(6);
+                j = y + this.random.nextInt(3) - this.random.nextInt(3);
+                k = z + this.random.nextInt(6) - this.random.nextInt(6);
             }
         }
 
@@ -666,13 +668,13 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
 
     public boolean isAirySpace(int x, int y, int z) {
         int p = this.world.getBlockId(x, y, z);
-        return p == 0 || Block.BY_ID[p].getCollisionShape(this.world, x, y, z) == null;
+        return p == 0 || Block.BLOCKS[p].getCollisionShape(this.world, x, y, z) == null;
     }
 
     public boolean checkSides(int a, int b, int c, int i, int j, int k, double dist, boolean first) {
         if (b > 4 && b < 124 && this.world.getBlockId(a, b, c) == Block.CHEST.id) {
             if (first && this.blockX == i && this.blockY == j && this.blockZ == k) {
-                this.setTarget(null);
+                this.setPath(null);
                 this.blockX = 0;
                 this.blockY = 0;
                 this.blockZ = 0;
@@ -681,9 +683,9 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
             }
 
             if (this.blockX == 0 && this.blockY == 0 && this.blockZ == 0 && this.chestOperations(a, b, c, false)) {
-                EntityPath emily = this.world.method_189(this, i, j, k, 16.0F);
+                Path emily = this.world.findPath(this, i, j, k, 16.0F);
                 if (emily != null) {
-                    this.setTarget(emily);
+                    this.setPath(emily);
                     this.blockX = i;
                     this.blockY = j;
                     this.blockZ = k;
@@ -699,9 +701,9 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
         BlockEntity te = this.world.getBlockEntity(x, y, z);
         if (te != null && te instanceof ChestBlockEntity chest) {
 
-            for (int q = 0; q < chest.getInventorySize(); ++q) {
-                if (chest.getInventoryItem(q) != null) {
-                    ItemStack stack = chest.getInventoryItem(q);
+            for (int q = 0; q < chest.size(); ++q) {
+                if (chest.getStack(q) != null) {
+                    ItemStack stack = chest.getStack(q);
                     if (stack.count > 0) {
                         if (this.weaponPoints <= 0 && stack.itemId == Item.STICK.id) {
                             if (arrived) {
@@ -810,7 +812,7 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
                                 return true;
                             }
 
-                            if (this.smokeStock <= 0 && stack.itemId == Item.REDSTONE_DUST.id) {
+                            if (this.smokeStock <= 0 && stack.itemId == Item.REDSTONE.id) {
                                 if (arrived) {
                                     this.smokeStock = 2;
                                     this.gotcha(chest, q);
@@ -826,10 +828,10 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
                                 }
 
                                 if (arrived && gottam > 0) {
-                                    this.world.playSound(this, "random.pop", 0.2F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+                                    this.world.playSound(this, "random.pop", 0.2F, ((this.random.nextFloat() - this.random.nextFloat()) * 0.7F + 1.0F) * 2.0F);
                                     if (gottam == 1) {
                                         this.logs += 5;
-                                        chest.takeInventoryItem(q, 5);
+                                        chest.removeStack(q, 5);
                                     }
                                 }
 
@@ -845,13 +847,13 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
                                     this.stickSharp = true;
 
                                     for (j = 0; j < 4; ++j) {
-                                        a = this.x + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
-                                        a = this.boundingBox.minY + 0.125 + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.25;
-                                        b = this.z + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
-                                        ClientUtil.addDiggingParticle(this.world, a, a, b, 0.0, 0.0, 0.0, Block.WOOD, 0, 0);
+                                        a = this.x + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
+                                        a = this.boundingBox.minY + 0.125 + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.25;
+                                        b = this.z + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
+                                        ClientUtil.addDiggingParticle(this.world, a, a, b, 0.0, 0.0, 0.0, Block.PLANKS, 0, 0);
                                     }
 
-                                    this.world.playSound(this, "random.wood click", 0.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+                                    this.world.playSound(this, "random.wood click", 0.75F, 1.0F / (this.random.nextFloat() * 0.2F + 0.9F));
                                 }
 
                                 return true;
@@ -862,13 +864,13 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
                                     this.armorPadded = true;
 
                                     for (j = 0; j < 4; ++j) {
-                                        a = this.x + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
-                                        a = this.boundingBox.minY + 0.125 + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.25;
-                                        b = this.z + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                                        a = this.x + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
+                                        a = this.boundingBox.minY + 0.125 + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.25;
+                                        b = this.z + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
                                         ClientUtil.addDiggingParticle(this.world, a, a, b, 0.0, 0.0, 0.0, Block.WOOL, 0, 0);
                                     }
 
-                                    this.world.playSound(this, "step.cloth", 0.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+                                    this.world.playSound(this, "step.cloth", 0.75F, 1.0F / (this.random.nextFloat() * 0.2F + 0.9F));
                                 }
 
                                 return true;
@@ -903,15 +905,15 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
                                         }
 
                                         for (u = 0; u < 18; ++u) {
-                                            a = this.x + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
-                                            b = this.y + 0.25 + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
-                                            double c = this.z + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                                            a = this.x + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
+                                            b = this.y + 0.25 + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
+                                            double c = this.z + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
                                             ClientUtil.addPoofParticle(this.world, a, b, c, item1);
                                         }
 
-                                        double a1 = this.x + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
-                                        double b1 = this.y + (double) this.rand.nextFloat() * 0.125;
-                                        double c1 = this.z + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                                        double a1 = this.x + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
+                                        double b1 = this.y + (double) this.random.nextFloat() * 0.125;
+                                        double c1 = this.z + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
                                         EntityClayMan ec = new EntityClayMan(this.world, a1, b1, c1, this.clayTeam);
                                         this.world.spawnEntity(ec);
                                         this.gotcha(chest, q);
@@ -967,9 +969,9 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
             }
 
             if (!flag) {
-                if (this.logs == 20 && this.rand.nextInt(2) == 0) {
+                if (this.logs == 20 && this.random.nextInt(2) == 0) {
                     this.buildHouseThree();
-                } else if (this.logs >= 10 && this.rand.nextInt(3) > 0) {
+                } else if (this.logs >= 10 && this.random.nextInt(3) > 0) {
                     this.buildHouseTwo();
                 } else if (this.logs >= 5) {
                     this.buildHouseOne();
@@ -988,7 +990,7 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
         int x = MathHelper.floor(this.x + 0.5);
         int y = MathHelper.floor(this.boundingBox.minY);
         int z = MathHelper.floor(this.z + 0.5);
-        int direction = this.rand.nextInt(4);
+        int direction = this.random.nextInt(4);
 
         for (int j = 0; j < 3; ++j) {
             int b = j;
@@ -1012,25 +1014,25 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
                         if (i != -1 && i != 2 && k != -1) {
                             this.world.setBlock(x + a, y + b, z + c, 0);
                         } else {
-                            this.world.setBlock(x + a, y + b, z + c, Block.WOOD.id);
+                            this.world.setBlock(x + a, y + b, z + c, Block.PLANKS.id);
                         }
                     } else if (j == 1) {
                         if (i == -1) {
-                            this.world.setBlockInChunk(x + a, y + b, z + c, Block.WOOD_STAIRS.id);
+                            this.world.setBlockWithoutNotifyingNeighbors(x + a, y + b, z + c, Block.WOODEN_STAIRS.id);
                             this.world.setBlockMeta(x + a, y + b, z + c, (direction + 2 + (direction % 2 == 0 ? 1 : -1)) % 4);
                         } else if (i == 2) {
-                            this.world.setBlockInChunk(x + a, y + b, z + c, Block.WOOD_STAIRS.id);
+                            this.world.setBlockWithoutNotifyingNeighbors(x + a, y + b, z + c, Block.WOODEN_STAIRS.id);
                             this.world.setBlockMeta(x + a, y + b, z + c, (direction + 2) % 4);
                         } else if (k == -1) {
-                            this.world.setBlock(x + a, y + b, z + c, Block.WOOD.id);
+                            this.world.setBlock(x + a, y + b, z + c, Block.PLANKS.id);
                         } else {
                             this.world.setBlock(x + a, y + b, z + c, 0);
                         }
                     } else if (i == 0) {
-                        this.world.setBlockInChunk(x + a, y + b, z + c, Block.WOOD_STAIRS.id);
+                        this.world.setBlockWithoutNotifyingNeighbors(x + a, y + b, z + c, Block.WOODEN_STAIRS.id);
                         this.world.setBlockMeta(x + a, y + b, z + c, (direction + 2 + (direction % 2 == 0 ? 1 : -1)) % 4);
                     } else if (i == 1) {
-                        this.world.setBlockInChunk(x + a, y + b, z + c, Block.WOOD_STAIRS.id);
+                        this.world.setBlockWithoutNotifyingNeighbors(x + a, y + b, z + c, Block.WOODEN_STAIRS.id);
                         this.world.setBlockMeta(x + a, y + b, z + c, (direction + 2) % 4);
                     } else {
                         this.world.setBlock(x + a, y + b, z + c, 0);
@@ -1039,8 +1041,8 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
             }
         }
 
-        this.world.playSound(this, "random.wood click", 1.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
-        this.world.playSound(this, "step.wood", 1.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+        this.world.playSound(this, "random.wood click", 1.75F, 1.0F / (this.random.nextFloat() * 0.2F + 0.9F));
+        this.world.playSound(this, "step.wood", 1.75F, 1.0F / (this.random.nextFloat() * 0.2F + 0.9F));
         this.logs -= 5;
     }
 
@@ -1048,7 +1050,7 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
         int x = MathHelper.floor(this.x);
         int y = MathHelper.floor(this.boundingBox.minY);
         int z = MathHelper.floor(this.z);
-        int direction = this.rand.nextInt(4);
+        int direction = this.random.nextInt(4);
 
         for (int j = 0; j < 3; ++j) {
             int b = j;
@@ -1072,33 +1074,33 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
                         if (j != 0 && j != 1) {
                             if (j == 2) {
                                 if (i == -2) {
-                                    this.world.setBlockInChunk(x + a, y + b, z + c, Block.WOOD_STAIRS.id);
+                                    this.world.setBlockWithoutNotifyingNeighbors(x + a, y + b, z + c, Block.WOODEN_STAIRS.id);
                                     this.world.setBlockMeta(x + a, y + b, z + c, (direction + 2 + (direction % 2 == 0 ? 1 : -1)) % 4);
                                 } else if (i == 2) {
-                                    this.world.setBlockInChunk(x + a, y + b, z + c, Block.WOOD_STAIRS.id);
+                                    this.world.setBlockWithoutNotifyingNeighbors(x + a, y + b, z + c, Block.WOODEN_STAIRS.id);
                                     this.world.setBlockMeta(x + a, y + b, z + c, (direction + 2) % 4);
                                 } else if (k == -2) {
-                                    this.world.setBlockInChunk(x + a, y + b, z + c, Block.WOOD_STAIRS.id);
+                                    this.world.setBlockWithoutNotifyingNeighbors(x + a, y + b, z + c, Block.WOODEN_STAIRS.id);
                                     this.world.setBlockMeta(x + a, y + b, z + c, (direction + (direction % 2 == 0 ? 1 : -1)) % 4);
                                 } else if (k == 2) {
-                                    this.world.setBlockInChunk(x + a, y + b, z + c, Block.WOOD_STAIRS.id);
+                                    this.world.setBlockWithoutNotifyingNeighbors(x + a, y + b, z + c, Block.WOODEN_STAIRS.id);
                                     this.world.setBlockMeta(x + a, y + b, z + c, direction % 4);
                                 } else {
-                                    this.world.setBlock(x + a, y + b, z + c, Block.WOOD.id);
+                                    this.world.setBlock(x + a, y + b, z + c, Block.PLANKS.id);
                                 }
                             }
                         } else if (i != -2 && i != 2 && k != -2 && (k != 2 || i == 0 && j != 1)) {
                             this.world.setBlock(x + a, y + b, z + c, 0);
                         } else {
-                            this.world.setBlock(x + a, y + b, z + c, Block.WOOD.id);
+                            this.world.setBlock(x + a, y + b, z + c, Block.PLANKS.id);
                         }
                     }
                 }
             }
         }
 
-        this.world.playSound(this, "random.wood click", 1.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
-        this.world.playSound(this, "step.wood", 1.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+        this.world.playSound(this, "random.wood click", 1.75F, 1.0F / (this.random.nextFloat() * 0.2F + 0.9F));
+        this.world.playSound(this, "step.wood", 1.75F, 1.0F / (this.random.nextFloat() * 0.2F + 0.9F));
         this.logs -= 10;
     }
 
@@ -1106,7 +1108,7 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
         int x = MathHelper.floor(this.x);
         int y = MathHelper.floor(this.boundingBox.minY);
         int z = MathHelper.floor(this.z);
-        int direction = this.rand.nextInt(4);
+        int direction = this.random.nextInt(4);
 
         for (int j = 0; j < 4; ++j) {
             int b = j;
@@ -1130,20 +1132,20 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
                         if (j < 3) {
                             if (i != -3 && i != 3 && k != -2 && (k != 2 || i == 0 && j <= 0)) {
                                 if (i == -2 && j == 0 && k == 0) {
-                                    this.world.setBlockInChunk(x + a, y + b, z + c, Block.CHEST.id);
+                                    this.world.setBlockWithoutNotifyingNeighbors(x + a, y + b, z + c, Block.CHEST.id);
                                     this.world.setBlockMeta(x + a, y + b, z + c, (direction + 2) % 4);
                                     ChestBlockEntity chest = (ChestBlockEntity) this.world.getBlockEntity(x + a, y + b, z + c);
-                                    chest.setInventoryItem(0, new ItemStack(Item.STICK, 16, 0));
+                                    chest.setStack(0, new ItemStack(Item.STICK, 16, 0));
                                 } else if (i == 0 && j == 0 && k == -1) {
-                                    this.world.setBlockInChunk(x + a, y + b, z + c, Block.WOOD_STAIRS.id);
+                                    this.world.setBlockWithoutNotifyingNeighbors(x + a, y + b, z + c, Block.WOODEN_STAIRS.id);
                                     this.world.setBlockMeta(x + a, y + b, z + c, (direction + 2 + (direction % 2 == 0 ? 1 : -1)) % 4);
                                 } else if (i == 1 && j == 1 && k == -1) {
-                                    this.world.setBlockInChunk(x + a, y + b, z + c, Block.WOOD_STAIRS.id);
+                                    this.world.setBlockWithoutNotifyingNeighbors(x + a, y + b, z + c, Block.WOODEN_STAIRS.id);
                                     this.world.setBlockMeta(x + a, y + b, z + c, (direction + 2 + (direction % 2 == 0 ? 1 : -1)) % 4);
                                 } else if (i == 2 && j == 1 && k == -1) {
-                                    this.world.setBlock(x + a, y + b, z + c, Block.WOOD.id);
+                                    this.world.setBlock(x + a, y + b, z + c, Block.PLANKS.id);
                                 } else if (i == 2 && j == 2 && k == 0) {
-                                    this.world.setBlockInChunk(x + a, y + b, z + c, Block.WOOD_STAIRS.id);
+                                    this.world.setBlockWithoutNotifyingNeighbors(x + a, y + b, z + c, Block.WOODEN_STAIRS.id);
                                     this.world.setBlockMeta(x + a, y + b, z + c, (direction + (direction % 2 == 0 ? 1 : -1)) % 4);
                                 } else if (i == 0 && j == 2 && k == -1) {
                                     this.world.setBlock(x + a, y + b, z + c, 0);
@@ -1152,21 +1154,21 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
                                 } else if (i == 2 && j == 2 && k == -1) {
                                     this.world.setBlock(x + a, y + b, z + c, 0);
                                 } else if (j == 2) {
-                                    this.world.setBlock(x + a, y + b, z + c, Block.WOOD.id);
+                                    this.world.setBlock(x + a, y + b, z + c, Block.PLANKS.id);
                                 } else {
                                     this.world.setBlock(x + a, y + b, z + c, 0);
                                 }
                             } else {
-                                this.world.setBlock(x + a, y + b, z + c, Block.WOOD.id);
+                                this.world.setBlock(x + a, y + b, z + c, Block.PLANKS.id);
                             }
                         } else if (j == 3) {
                             if (i != -3 && i != 3 && k != -2 && (k != 2 || i == 0 && j <= 0)) {
                                 this.world.setBlock(x + a, y + b, z + c, 0);
                             } else if (i != -2 && i != 0 && i != 2 && k != 0) {
-                                this.world.setBlock(x + a, y + b, z + c, Block.STONE_SLAB.id);
+                                this.world.setBlock(x + a, y + b, z + c, Block.SLAB.id);
                                 this.world.setBlockMeta(x + a, y + b, z + c, 2);
                             } else {
-                                this.world.setBlock(x + a, y + b, z + c, Block.WOOD.id);
+                                this.world.setBlock(x + a, y + b, z + c, Block.PLANKS.id);
                             }
                         }
                     }
@@ -1174,8 +1176,8 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
             }
         }
 
-        this.world.playSound(this, "random.wood click", 1.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
-        this.world.playSound(this, "step.wood", 1.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+        this.world.playSound(this, "random.wood click", 1.75F, 1.0F / (this.random.nextFloat() * 0.2F + 0.9F));
+        this.world.playSound(this, "step.wood", 1.75F, 1.0F / (this.random.nextFloat() * 0.2F + 0.9F));
         this.logs -= 20;
     }
 
@@ -1188,15 +1190,15 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
             f5 = 1.0F;
         }
 
-        this.limbDistance += (f5 - this.limbDistance) * 0.4F;
-        this.field_1050 += this.limbDistance;
+        this.walkAnimationSpeed += (f5 - this.walkAnimationSpeed) * 0.4F;
+        this.walkAnimationProgress += this.walkAnimationSpeed;
     }
 
     public void swingArm() {
         if (!this.isSwinging) {
             this.isSwinging = true;
-            this.lastHandSwingProgress = 0.0F;
-            this.handSwingProgress = 0.0F;
+            this.lastSwingAnimationProgress = 0.0F;
+            this.swingAnimationProgress = 0.0F;
         }
 
     }
@@ -1212,7 +1214,7 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
     public boolean hitTargetMakesDead(Entity e) {
         this.strikeTime = 12;
         this.swingArm();
-        int power = this.weaponPoints > 0 ? 3 + this.rand.nextInt(2) + (this.stickSharp ? 1 : 0) : 2;
+        int power = this.weaponPoints > 0 ? 3 + this.random.nextInt(2) + (this.stickSharp ? 1 : 0) : 2;
         if (this.weaponPoints > 0) {
             --this.weaponPoints;
         }
@@ -1230,63 +1232,63 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
         double d1 = entity.z - this.z;
         EntityGravelChunk entitygravelchunk = new EntityGravelChunk(this.world, this, this.clayTeam);
         entitygravelchunk.y += 0.3999999761581421;
-        double d2 = entity.y + (double) entity.getStandingEyeHeight() - 0.10000000298023223 - entitygravelchunk.y;
+        double d2 = entity.y + (double) entity.getEyeHeight() - 0.10000000298023223 - entitygravelchunk.y;
         float f1 = MathHelper.sqrt(d * d + d1 * d1) * 0.2F;
         this.world.spawnEntity(entitygravelchunk);
         entitygravelchunk.setArrowHeading(d, d2 + (double) f1, d1, 0.6F, 12.0F);
-        this.attackTime = 30;
-        this.forwardVelocity = -this.forwardVelocity;
+        this.attackCooldown = 30;
+        this.forwardSpeed = -this.forwardSpeed;
         this.yaw = (float) (Math.atan2(d1, d) * 180.0 / 3.1415927410125732) - 90.0F;
-        this.field_663 = true;
+        this.movementBlocked = true;
         this.swingLeftArm();
     }
 
     public void gotcha(ItemEntity item) {
-        this.world.playSound(item, "random.pop", 0.2F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+        this.world.playSound(item, "random.pop", 0.2F, ((this.random.nextFloat() - this.random.nextFloat()) * 0.7F + 1.0F) * 2.0F);
         if (item.stack != null) {
             --item.stack.count;
             if (item.stack.count <= 0) {
-                item.remove();
+                item.markDead();
             }
         } else {
-            item.remove();
+            item.markDead();
         }
 
         this.targetFollow = null;
-        this.setTarget(null);
+        this.setPath(null);
     }
 
     public void gotcha(ChestBlockEntity chest, int q) {
-        this.world.playSound(this, "random.pop", 0.2F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
-        chest.takeInventoryItem(q, 1);
+        this.world.playSound(this, "random.pop", 0.2F, ((this.random.nextFloat() - this.random.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+        chest.removeStack(q, 1);
     }
 
-    public void writeNBT(CompoundTag nbttagcompound) {
-        super.writeNBT(nbttagcompound);
-        nbttagcompound.put("ClayTeam", (short) this.clayTeam);
-        nbttagcompound.put("WeaponPoints", (short) this.weaponPoints);
-        nbttagcompound.put("ArmorPoints", (short) this.armorPoints);
-        nbttagcompound.put("FoodLeft", (short) this.foodLeft);
-        nbttagcompound.put("SugarTime", (short) this.sugarTime);
-        nbttagcompound.put("ResPoints", (short) this.resPoints);
-        nbttagcompound.put("StrikeTime", (short) this.strikeTime);
-        nbttagcompound.put("ClimbTime", (short) this.climbTime);
-        nbttagcompound.put("GooTime", (short) this.gooTime);
-        nbttagcompound.put("SmokeTime", (short) this.smokeTime);
-        nbttagcompound.put("GooStock", (short) this.gooStock);
-        nbttagcompound.put("SmokeStock", (short) this.smokeStock);
-        nbttagcompound.put("Logs", (short) this.logs);
-        nbttagcompound.put("Rocks", (short) this.rocks);
-        nbttagcompound.put("Gunpowdered", this.gunpowdered);
-        nbttagcompound.put("King", this.king);
-        nbttagcompound.put("Glowing", this.glowing);
-        nbttagcompound.put("StickSharp", this.stickSharp);
-        nbttagcompound.put("ArmorPadded", this.armorPadded);
-        nbttagcompound.put("HeavyCore", this.heavyCore);
+    public void write(NbtCompound nbttagcompound) {
+        super.write(nbttagcompound);
+        nbttagcompound.putShort("ClayTeam", (short) this.clayTeam);
+        nbttagcompound.putShort("WeaponPoints", (short) this.weaponPoints);
+        nbttagcompound.putShort("ArmorPoints", (short) this.armorPoints);
+        nbttagcompound.putShort("FoodLeft", (short) this.foodLeft);
+        nbttagcompound.putShort("SugarTime", (short) this.sugarTime);
+        nbttagcompound.putShort("ResPoints", (short) this.resPoints);
+        nbttagcompound.putShort("StrikeTime", (short) this.strikeTime);
+        nbttagcompound.putShort("ClimbTime", (short) this.climbTime);
+        nbttagcompound.putShort("GooTime", (short) this.gooTime);
+        nbttagcompound.putShort("SmokeTime", (short) this.smokeTime);
+        nbttagcompound.putShort("GooStock", (short) this.gooStock);
+        nbttagcompound.putShort("SmokeStock", (short) this.smokeStock);
+        nbttagcompound.putShort("Logs", (short) this.logs);
+        nbttagcompound.putShort("Rocks", (short) this.rocks);
+        nbttagcompound.putBoolean("Gunpowdered", this.gunpowdered);
+        nbttagcompound.putBoolean("King", this.king);
+        nbttagcompound.putBoolean("Glowing", this.glowing);
+        nbttagcompound.putBoolean("StickSharp", this.stickSharp);
+        nbttagcompound.putBoolean("ArmorPadded", this.armorPadded);
+        nbttagcompound.putBoolean("HeavyCore", this.heavyCore);
     }
 
-    public void readNBT(CompoundTag nbttagcompound) {
-        super.readNBT(nbttagcompound);
+    public void read(NbtCompound nbttagcompound) {
+        super.read(nbttagcompound);
         this.clayTeam = nbttagcompound.getShort("ClayTeam");
         this.texture = this.clayManTexture(this.clayTeam);
         this.weaponPoints = nbttagcompound.getShort("WeaponPoints");
@@ -1311,36 +1313,36 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
     }
 
     protected String getHurtSound() {
-        this.world.playSound(this, "random.hurt", 0.6F, (this.rand.nextFloat() * 0.2F + 1.6F));
-        this.world.playSound(this, "step.gravel", 0.6F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+        this.world.playSound(this, "random.hurt", 0.6F, (this.random.nextFloat() * 0.2F + 1.6F));
+        this.world.playSound(this, "step.gravel", 0.6F, 1.0F / (this.random.nextFloat() * 0.2F + 0.9F));
         return "";
     }
 
     protected String getDeathSound() {
-        this.world.playSound(this, "random.hurt", 0.6F, (this.rand.nextFloat() * 0.2F + 1.6F));
+        this.world.playSound(this, "random.hurt", 0.6F, (this.random.nextFloat() * 0.2F + 1.6F));
         return "step.gravel";
     }
 
     protected void jump() {
         if (this.gooTime <= 0) {
             if (this.sugarTime > 0) {
-                this.yVelocity = 0.375;
+                this.velocityY = 0.375;
             } else {
-                this.yVelocity = 0.275;
+                this.velocityY = 0.275;
             }
 
         }
     }
 
-    public boolean method_932() {
-        if (this.logs <= 0 && this.field_1624 && !this.onGround && this.climbTime > 0) {
+    public boolean isOnLadder() {
+        if (this.logs <= 0 && this.horizontalCollision && !this.onGround && this.climbTime > 0) {
             if (this.climbTime != 10) {
                 this.throwTime = 5;
                 --this.climbTime;
                 return true;
             }
 
-            if (this.yVelocity < 0.05) {
+            if (this.velocityY < 0.05) {
                 --this.climbTime;
                 this.throwTime = 5;
                 return true;
@@ -1398,7 +1400,7 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
         return this.rocks > 0 && this.throwTime <= 0 && this.logs <= 0;
     }
 
-    public void getDrops() {
+    public void dropItems() {
         if (!this.gunpowdered) {
             Item item1 = ItemListener.greyDoll.asItem();
             if (this.clayTeam == 1) {
@@ -1420,35 +1422,35 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
                 this.dropItem(Item.CLAY.id, 1);
             }
 
-            if (this.weaponPoints > 7 && this.rand.nextInt(2) == 0) {
+            if (this.weaponPoints > 7 && this.random.nextInt(2) == 0) {
                 this.dropItem(Item.STICK.id, 1);
             }
 
-            if (this.armorPoints > 7 && this.rand.nextInt(2) == 0) {
+            if (this.armorPoints > 7 && this.random.nextInt(2) == 0) {
                 this.dropItem(Item.LEATHER.id, 1);
             }
 
-            if (this.rocks > 7 && this.rand.nextInt(2) == 0) {
+            if (this.rocks > 7 && this.random.nextInt(2) == 0) {
                 this.dropItem(Block.GRAVEL.id, 1);
             }
 
-            if (this.smokeStock > 1 && this.rand.nextInt(2) == 0) {
-                this.dropItem(Item.REDSTONE_DUST.id, 1);
+            if (this.smokeStock > 1 && this.random.nextInt(2) == 0) {
+                this.dropItem(Item.REDSTONE.id, 1);
             }
 
-            if (this.gooStock > 1 && this.rand.nextInt(2) == 0) {
+            if (this.gooStock > 1 && this.random.nextInt(2) == 0) {
                 this.dropItem(Item.SLIMEBALL.id, 1);
             }
 
-            if (this.smokeStock > 1 && this.rand.nextInt(2) == 0) {
-                this.dropItem(Item.REDSTONE_DUST.id, 1);
+            if (this.smokeStock > 1 && this.random.nextInt(2) == 0) {
+                this.dropItem(Item.REDSTONE.id, 1);
             }
 
-            if (this.gooStock > 1 && this.rand.nextInt(2) == 0) {
+            if (this.gooStock > 1 && this.random.nextInt(2) == 0) {
                 this.dropItem(Item.SLIMEBALL.id, 1);
             }
 
-            if (this.glowing && this.rand.nextInt(2) == 0) {
+            if (this.glowing && this.random.nextInt(2) == 0) {
                 this.dropItem(Item.GLOWSTONE_DUST.id, 1);
             }
 
@@ -1468,7 +1470,7 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
     }
 
     public boolean damage(Entity e, int i) {
-        if (this.vehicle != null && i < 100 && this.rand.nextInt(2) == 0) {
+        if (this.vehicle != null && i < 100 && this.random.nextInt(2) == 0) {
             return this.vehicle.damage(e, i);
         } else {
             if (e != null && e instanceof EntityClayMan james) {
@@ -1481,7 +1483,7 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
                 }
 
                 if (this.smokeTime <= 0) {
-                    this.entity = e;
+                    this.target = e;
                 }
 
                 if (this.armorPoints > 0) {
@@ -1501,44 +1503,44 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
                     double a;
                     double b;
                     double c;
-                    if ((james.smokeStock <= 0 || this.smokeTime <= 0 || this.rand.nextInt(2) == 0) && james.gooStock > 0 && this.gooTime <= 0 && this.onGround) {
+                    if ((james.smokeStock <= 0 || this.smokeTime <= 0 || this.random.nextInt(2) == 0) && james.gooStock > 0 && this.gooTime <= 0 && this.onGround) {
                         --james.gooStock;
                         this.gooTime = 150;
-                        this.world.playSound(this, "mob.slimeattack", 0.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+                        this.world.playSound(this, "mob.slimeattack", 0.75F, 1.0F / (this.random.nextFloat() * 0.2F + 0.9F));
 
                         for (j = 0; j < 4; ++j) {
-                            a = this.x + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
-                            b = this.boundingBox.minY + 0.125 + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
-                            c = this.z + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                            a = this.x + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
+                            b = this.boundingBox.minY + 0.125 + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
+                            c = this.z + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
                             this.world.addParticle("slime", a, b, c, 0.0, 0.1, 0.0);
                         }
 
-                        this.xVelocity = 0.0;
-                        this.yVelocity = 0.0;
-                        this.zVelocity = 0.0;
-                        this.forwardVelocity = 0.0F;
-                        this.horizontalVelocity = 0.0F;
+                        this.velocityX = 0.0;
+                        this.velocityY = 0.0;
+                        this.velocityZ = 0.0;
+                        this.forwardSpeed = 0.0F;
+                        this.sidewaysSpeed = 0.0F;
                         this.jumping = false;
                     } else if (james.smokeStock > 0 && this.smokeTime <= 0) {
                         --james.smokeStock;
                         this.smokeTime = 100;
-                        this.world.playSound(this, "random.fizz", 0.75F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+                        this.world.playSound(this, "random.fizz", 0.75F, 1.0F / (this.random.nextFloat() * 0.2F + 0.9F));
 
                         for (j = 0; j < 8; ++j) {
-                            a = this.x + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
-                            b = this.boundingBox.minY + 0.25 + (double) this.rand.nextFloat() * 0.25;
-                            c = this.z + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                            a = this.x + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
+                            b = this.boundingBox.minY + 0.25 + (double) this.random.nextFloat() * 0.25;
+                            c = this.z + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
                             this.world.addParticle("reddust", a, b, c, 0.0, 0.1, 0.0);
                         }
 
                         this.targetFollow = null;
-                        this.entity = null;
-                        this.setTarget(null);
+                        this.target = null;
+                        this.setPath(null);
                     }
                 }
             } else {
                 i = 20;
-                if (e instanceof FishHookEntity) {
+                if (e instanceof FishingBobberEntity) {
                     return false;
                 }
             }
@@ -1561,13 +1563,13 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
                 }
 
                 for (int q = 0; q < 24; ++q) {
-                    double a = this.x + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
-                    double b = this.y + 0.25 + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
-                    double c = this.z + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                    double a = this.x + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
+                    double b = this.y + 0.25 + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
+                    double c = this.z + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
                     ClientUtil.addPoofParticle(this.world, a, b, c, item1);
                 }
 
-                this.removed = true;
+                this.dead = true;
                 if (e != null && e instanceof PlayerEntity) {
                     this.killedByPlayer = e;
                 }
@@ -1581,36 +1583,36 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
         }
     }
 
-    public void accelerate(double d, double d1, double d2) {
+    public void addVelocity(double d, double d1, double d2) {
         if (this.gooTime <= 0) {
-            this.xVelocity += d;
-            this.yVelocity += d1;
-            this.zVelocity += d2;
+            this.velocityX += d;
+            this.velocityY += d1;
+            this.velocityZ += d2;
         }
     }
 
-    public void method_925(Entity entity, int i, double d, double d1) {
+    public void applyKnockback(Entity entity, int i, double d, double d1) {
         if (this.gooTime <= 0) {
-            super.method_925(entity, i, d, d1);
+            super.applyKnockback(entity, i, d, d1);
             if (entity != null && entity instanceof EntityClayMan ec) {
                 if ((!ec.heavyCore || !this.heavyCore) && (ec.heavyCore || this.heavyCore)) {
                     if (!ec.heavyCore && this.heavyCore) {
-                        this.xVelocity *= 0.2;
-                        this.yVelocity *= 0.4;
-                        this.zVelocity *= 0.2;
+                        this.velocityX *= 0.2;
+                        this.velocityY *= 0.4;
+                        this.velocityZ *= 0.2;
                     } else {
-                        this.xVelocity *= 1.5;
-                        this.zVelocity *= 1.5;
+                        this.velocityX *= 1.5;
+                        this.velocityZ *= 1.5;
                     }
                 } else {
-                    this.xVelocity *= 0.6;
-                    this.yVelocity *= 0.75;
-                    this.zVelocity *= 0.6;
+                    this.velocityX *= 0.6;
+                    this.velocityY *= 0.75;
+                    this.velocityZ *= 0.6;
                 }
             } else if (entity != null && entity instanceof EntityGravelChunk) {
-                this.xVelocity *= 0.6;
-                this.yVelocity *= 0.75;
-                this.zVelocity *= 0.6;
+                this.velocityX *= 0.6;
+                this.velocityY *= 0.75;
+                this.velocityZ *= 0.6;
             }
 
         }
@@ -1626,11 +1628,11 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
     }
 
     public float getForwardVelocity() {
-        return forwardVelocity;
+        return forwardSpeed;
     }
 
     public float getHorizontalVelocity() {
-        return horizontalVelocity;
+        return sidewaysSpeed;
     }
 
     public float getFallDistance() {
@@ -1643,7 +1645,7 @@ public class EntityClayMan extends AbstractAnimalEntity implements MobSpawnDataP
 
     @Override
     public Identifier getHandlerIdentifier() {
-        return Identifier.of(MODID, "claysoldier");
+        return Identifier.of(EntityListener.MOD_ID, "claysoldier");
     }
 
     @Override

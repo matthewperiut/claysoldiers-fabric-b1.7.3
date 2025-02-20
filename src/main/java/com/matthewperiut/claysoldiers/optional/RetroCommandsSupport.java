@@ -1,9 +1,9 @@
 package com.matthewperiut.claysoldiers.optional;
 
 import com.matthewperiut.claysoldiers.entity.behavior.EntityClayMan;
-import com.matthewperiut.spc.api.SummonRegistry;
+import com.matthewperiut.retrocommands.api.SummonRegistry;
 
-public class SPCSupport {
+public class RetroCommandsSupport {
     public static void addEntities() {
         SummonRegistry.add(EntityClayMan.class, ((world, posParse, strings) -> {
             int team = Integer.parseInt(strings[5]);

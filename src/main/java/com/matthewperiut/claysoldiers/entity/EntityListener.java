@@ -14,7 +14,7 @@ import net.modificationstation.stationapi.api.util.Null;
 
 public class EntityListener {
     @Entrypoint.Namespace
-    public static final Namespace MOD_ID = Null.get();
+    public static Namespace MOD_ID = Null.get();
 
     @EventListener
     public void registerEntities(EntityRegister event) {

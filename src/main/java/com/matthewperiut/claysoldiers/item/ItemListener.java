@@ -10,7 +10,7 @@ import net.modificationstation.stationapi.api.util.Null;
 
 public class ItemListener {
     @Entrypoint.Namespace
-    public static final Namespace MOD_ID = Null.get();
+    public static Namespace MOD_ID = Null.get();
 
     public static Item
             clayDisruptor,

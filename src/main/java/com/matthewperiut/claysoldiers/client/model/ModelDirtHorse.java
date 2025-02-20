@@ -1,23 +1,23 @@
 package com.matthewperiut.claysoldiers.client.model;
 
-import net.minecraft.client.model.Cuboid;
+import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.util.math.MathHelper;
 
 public class ModelDirtHorse extends BipedEntityModel {
 
-    public Cuboid bipedEar1;
-    public Cuboid bipedEar2;
-    public Cuboid bipedTail;
-    public Cuboid bipedNeck;
-    public Cuboid bipedMane;
+    public ModelPart bipedEar1;
+    public ModelPart bipedEar2;
+    public ModelPart bipedTail;
+    public ModelPart bipedNeck;
+    public ModelPart bipedMane;
 
-    public Cuboid head;
-    public Cuboid body;
-    public Cuboid leg1;
-    public Cuboid leg2;
-    public Cuboid leg3;
-    public Cuboid leg4;
+    public ModelPart head;
+    public ModelPart body;
+    public ModelPart leg1;
+    public ModelPart leg2;
+    public ModelPart leg3;
+    public ModelPart leg4;
 
     public ModelDirtHorse() {
         this(0.0F);
@@ -28,41 +28,41 @@ public class ModelDirtHorse extends BipedEntityModel {
     }
 
     public ModelDirtHorse(float f, float f1) {
-        this.head = new Cuboid(0, 0);
-        this.head.method_1818(-1.0F, 0.0F, -4.0F, 2, 2, 4, f + 0.2F);
-        this.head.setRotationPoint(0.0F, -3.75F + f1, -7.75F);
-        this.bipedEar1 = new Cuboid(0, 0);
-        this.bipedEar1.method_1818(-1.25F, -0.8F, -1.0F, 1, 1, 1, f - 0.1F);
-        this.bipedEar1.setRotationPoint(0.0F, -3.75F + f1, -7.75F);
-        this.bipedEar2 = new Cuboid(0, 0);
-        this.bipedEar2.method_1818(0.25F, -0.8F, -1.0F, 1, 1, 1, f - 0.1F);
-        this.bipedEar2.setRotationPoint(0.0F, -3.75F + f1, -7.75F);
-        this.body = new Cuboid(0, 8);
-        this.body.method_1818(-2.0F, 0.0F, -4.0F, 4, 4, 8, f);
-        this.body.setRotationPoint(0.0F, 0.0F + f1, 0.0F);
-        this.bipedNeck = new Cuboid(12, 0);
-        this.bipedNeck.method_1818(-1.0F, 0.0F, -6.0F, 2, 2, 6, f + 0.4F);
-        this.bipedNeck.setRotationPoint(0.0F, 0.0F + f1, -2.0F);
-        this.bipedMane = new Cuboid(28, 0);
-        this.bipedMane.method_1818(-1.0F, -1.1F, -6.0F, 2, 1, 6, f);
-        this.bipedMane.setRotationPoint(0.0F, 0.0F + f1, -2.0F);
-        this.leg1 = new Cuboid(24, 10);
-        this.leg1.method_1818(-1.0F, 0.0F, -1.0F, 2, 8, 2, f - 0.25F);
-        this.leg1.setRotationPoint(-1.0F, 3.75F + f1, -2.75F);
-        this.leg2 = new Cuboid(24, 10);
+        this.head = new ModelPart(0, 0);
+        this.head.addCuboid(-1.0F, 0.0F, -4.0F, 2, 2, 4, f + 0.2F);
+        this.head.setPivot(0.0F, -3.75F + f1, -7.75F);
+        this.bipedEar1 = new ModelPart(0, 0);
+        this.bipedEar1.addCuboid(-1.25F, -0.8F, -1.0F, 1, 1, 1, f - 0.1F);
+        this.bipedEar1.setPivot(0.0F, -3.75F + f1, -7.75F);
+        this.bipedEar2 = new ModelPart(0, 0);
+        this.bipedEar2.addCuboid(0.25F, -0.8F, -1.0F, 1, 1, 1, f - 0.1F);
+        this.bipedEar2.setPivot(0.0F, -3.75F + f1, -7.75F);
+        this.body = new ModelPart(0, 8);
+        this.body.addCuboid(-2.0F, 0.0F, -4.0F, 4, 4, 8, f);
+        this.body.setPivot(0.0F, 0.0F + f1, 0.0F);
+        this.bipedNeck = new ModelPart(12, 0);
+        this.bipedNeck.addCuboid(-1.0F, 0.0F, -6.0F, 2, 2, 6, f + 0.4F);
+        this.bipedNeck.setPivot(0.0F, 0.0F + f1, -2.0F);
+        this.bipedMane = new ModelPart(28, 0);
+        this.bipedMane.addCuboid(-1.0F, -1.1F, -6.0F, 2, 1, 6, f);
+        this.bipedMane.setPivot(0.0F, 0.0F + f1, -2.0F);
+        this.leg1 = new ModelPart(24, 10);
+        this.leg1.addCuboid(-1.0F, 0.0F, -1.0F, 2, 8, 2, f - 0.25F);
+        this.leg1.setPivot(-1.0F, 3.75F + f1, -2.75F);
+        this.leg2 = new ModelPart(24, 10);
         this.leg2.mirror = true;
-        this.leg2.method_1818(-1.0F, 0.0F, -1.0F, 2, 8, 2, f - 0.25F);
-        this.leg2.setRotationPoint(1.0F, 3.75F + f1, -2.75F);
-        this.leg3 = new Cuboid(24, 10);
-        this.leg3.method_1818(-1.0F, 0.0F, -1.0F, 2, 8, 2, f - 0.25F);
-        this.leg3.setRotationPoint(-1.0F, 3.75F + f1, 2.75F);
-        this.leg4 = new Cuboid(24, 10);
+        this.leg2.addCuboid(-1.0F, 0.0F, -1.0F, 2, 8, 2, f - 0.25F);
+        this.leg2.setPivot(1.0F, 3.75F + f1, -2.75F);
+        this.leg3 = new ModelPart(24, 10);
+        this.leg3.addCuboid(-1.0F, 0.0F, -1.0F, 2, 8, 2, f - 0.25F);
+        this.leg3.setPivot(-1.0F, 3.75F + f1, 2.75F);
+        this.leg4 = new ModelPart(24, 10);
         this.leg4.mirror = true;
-        this.leg4.method_1818(-1.0F, 0.0F, -1.0F, 2, 8, 2, f - 0.25F);
-        this.leg4.setRotationPoint(1.0F, 3.75F + f1, 2.75F);
-        this.bipedTail = new Cuboid(36, 11);
-        this.bipedTail.method_1818(-0.5F, 0.0F, -0.5F, 1, 5, 1, f + 0.15F);
-        this.bipedTail.setRotationPoint(0.0F, 0.0F + f1, 3.75F);
+        this.leg4.addCuboid(-1.0F, 0.0F, -1.0F, 2, 8, 2, f - 0.25F);
+        this.leg4.setPivot(1.0F, 3.75F + f1, 2.75F);
+        this.bipedTail = new ModelPart(36, 11);
+        this.bipedTail.addCuboid(-0.5F, 0.0F, -0.5F, 1, 5, 1, f + 0.15F);
+        this.bipedTail.setPivot(0.0F, 0.0F + f1, 3.75F);
     }
 
     public void render(float f, float f1, float f2, float f3, float f4, float f5) {

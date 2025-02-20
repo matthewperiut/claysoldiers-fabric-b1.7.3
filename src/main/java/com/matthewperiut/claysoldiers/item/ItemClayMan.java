@@ -14,12 +14,12 @@ public class ItemClayMan extends TemplateItem {
     public ItemClayMan(Identifier id, int j) {
         super(id);
         this.clayTeam = j;
-        this.maxStackSize = 16;
+        this.maxCount = 16;
     }
 
     protected void spawnEntity(World world, double x, double y, double z) {
         EntityClayMan ec = new EntityClayMan(world, x, y, z, this.clayTeam);
-        world.playSound(x, y, z, "step.gravel", 0.8F, ((rand.nextFloat() - rand.nextFloat()) * 0.2F + 1.0F) * 0.9F);
+        world.playSound(x, y, z, "step.gravel", 0.8F, ((random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F) * 0.9F);
         world.spawnEntity(ec);
     }
 
@@ -56,12 +56,12 @@ public class ItemClayMan extends TemplateItem {
 
         boolean jack = false;
         int p = world.getBlockId(i, j, k);
-        if (p == 0 || Block.BY_ID[p].getCollisionShape(world, i, j, k) == null) {
-            if (!world.isClient) {
+        if (p == 0 || Block.BLOCKS[p].getCollisionShape(world, i, j, k) == null) {
+            if (!world.isRemote) {
                 while (itemstack.count > 0) {
-                    double a = (double) i + 0.25D + (double) rand.nextFloat() * 0.5D;
+                    double a = (double) i + 0.25D + (double) random.nextFloat() * 0.5D;
                     double b = (double) j + 0.5D;
-                    double c = (double) k + 0.25D + (double) rand.nextFloat() * 0.5D;
+                    double c = (double) k + 0.25D + (double) random.nextFloat() * 0.5D;
                     spawnEntity(world, a, b, c);
                     jack = true;
                     --itemstack.count;

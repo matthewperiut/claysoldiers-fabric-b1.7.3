@@ -4,9 +4,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
-import net.minecraft.client.entity.particle.DiggingParticleEntity;
-import net.minecraft.client.entity.particle.ParticleEntity;
-import net.minecraft.client.entity.particle.PoofParticleEntity;
+import net.minecraft.client.particle.BlockParticle;
+import net.minecraft.client.particle.ItemParticle;
+import net.minecraft.client.particle.Particle;
 import net.minecraft.item.Item;
 import net.minecraft.world.World;
 
@@ -24,18 +24,18 @@ public class ClientUtil {
     }
 
     @Environment(EnvType.CLIENT)
-    private static void addParticleClient(ParticleEntity entity) {
+    private static void addParticleClient(Particle entity) {
         // todo: ((Minecraft) FabricLoader.getInstance().getGameInstance()).particleManager.addParticle(entity);
     }
 
     @Environment(EnvType.CLIENT)
     private static void addPoofParticleClient(World arg, double d, double e, double f, Item arg2) {
-        addParticleClient(new PoofParticleEntity(arg, d, e, f, arg2));
+        addParticleClient(new ItemParticle(arg, d, e, f, arg2));
     }
 
     @Environment(EnvType.CLIENT)
     private static void addDiggingParticleClient(World arg, double d, double e, double f, double g, double h, double i, Block arg2, int j, int k) {
-        addParticleClient(new DiggingParticleEntity(arg, d, e, f, g, h, i, arg2, j, k));
+        addParticleClient(new BlockParticle(arg, d, e, f, g, h, i, arg2, j, k));
     }
 
     public static void addSlimeFX() {

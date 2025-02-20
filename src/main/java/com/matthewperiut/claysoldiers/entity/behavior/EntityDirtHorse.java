@@ -1,12 +1,13 @@
 package com.matthewperiut.claysoldiers.entity.behavior;
 
+import com.matthewperiut.claysoldiers.entity.EntityListener;
 import com.matthewperiut.claysoldiers.item.ItemListener;
 import com.matthewperiut.claysoldiers.util.ClientUtil;
-import net.minecraft.entity.AbstractAnimalEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.item.Item;
-import net.minecraft.util.io.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.modificationstation.stationapi.api.server.entity.HasTrackingParameters;
@@ -15,19 +16,17 @@ import net.modificationstation.stationapi.api.util.Identifier;
 
 import java.util.List;
 
-import static com.matthewperiut.claysoldiers.ClaySoldiersMod.MODID;
-
 @HasTrackingParameters(trackingDistance = 160, updatePeriod = 2)
-public class EntityDirtHorse extends AbstractAnimalEntity implements MobSpawnDataProvider {
+public class EntityDirtHorse extends AnimalEntity implements MobSpawnDataProvider {
     public boolean gotRider;
 
     public EntityDirtHorse(World world) {
         super(world);
         this.health = 30;
         this.standingEyeHeight = 0.0F;
-        this.field_1641 = 0.1F;
+        this.stepHeight = 0.1F;
         this.movementSpeed = 0.6F;
-        this.setSize(0.25F, 0.4F);
+        this.setBoundingBoxSpacing(0.25F, 0.4F);
         this.setPosition(this.x, this.y, this.z);
         this.texture = "claysoldiers:textures/entities/dirtHorse.png";
         this.renderDistanceMultiplier = 5.0D;
@@ -37,13 +36,13 @@ public class EntityDirtHorse extends AbstractAnimalEntity implements MobSpawnDat
         super(world);
         this.health = 30;
         this.standingEyeHeight = 0.0F;
-        this.field_1641 = 0.1F;
+        this.stepHeight = 0.1F;
         this.movementSpeed = 0.6F;
-        this.setSize(0.25F, 0.4F);
+        this.setBoundingBoxSpacing(0.25F, 0.4F);
         this.setPosition(x, y, z);
         this.texture = "/claymans/dirtHorse.png";
         this.renderDistanceMultiplier = 5.0;
-        this.world.playSound(this, "step.gravel", 0.8F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F) * 0.9F);
+        this.world.playSound(this, "step.gravel", 0.8F, ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F) * 0.9F);
     }
 
     public void tick() {
@@ -61,7 +60,7 @@ public class EntityDirtHorse extends AbstractAnimalEntity implements MobSpawnDat
                 if (entity instanceof EntityClayMan) {
                     LivingEntity entityliving = (LivingEntity) entity;
                     if (entityliving.vehicle == null && entityliving.passenger != this) {
-                        entity.startRiding(this);
+                        entity.setVehicle(this);
                         break;
                     }
                 }
@@ -72,20 +71,20 @@ public class EntityDirtHorse extends AbstractAnimalEntity implements MobSpawnDat
 
     }
 
-    public void tickHandSwing() {
+    public void tickLiving() {
         if (this.passenger != null && this.passenger instanceof EntityClayMan rider) {
-            this.jumping = rider.isJumping() || this.method_1393();
-            this.forwardVelocity = rider.getForwardVelocity() * (rider.sugarTime > 0 ? 1.0F : 2.0F);
-            this.horizontalVelocity = rider.getHorizontalVelocity() * (rider.sugarTime > 0 ? 1.0F : 2.0F);
+            this.jumping = rider.isJumping() || this.checkWaterCollisions();
+            this.forwardSpeed = rider.getForwardVelocity() * (rider.sugarTime > 0 ? 1.0F : 2.0F);
+            this.sidewaysSpeed = rider.getHorizontalVelocity() * (rider.sugarTime > 0 ? 1.0F : 2.0F);
             this.yaw = this.prevYaw = rider.yaw;
             this.pitch = this.prevPitch = rider.pitch;
-            rider.field_1012 = this.field_1012;
+            rider.bodyYaw = this.bodyYaw;
             ((EntityClayMan) this.passenger).setFallDistance(0.0F);
-            if (rider.removed || rider.health <= 0) {
-                rider.startRiding(null);
+            if (rider.dead || rider.health <= 0) {
+                rider.setVehicle(null);
             }
         } else {
-            super.tickHandSwing();
+            super.tickLiving();
         }
 
     }
@@ -99,23 +98,23 @@ public class EntityDirtHorse extends AbstractAnimalEntity implements MobSpawnDat
             f5 = 1.0F;
         }
 
-        this.limbDistance += (f5 - this.limbDistance) * 0.4F;
-        this.field_1050 += this.limbDistance;
+        this.walkAnimationSpeed += (f5 - this.walkAnimationSpeed) * 0.4F;
+        this.walkAnimationProgress += this.walkAnimationSpeed;
     }
 
-    public void writeNBT(CompoundTag nbttagcompound) {
-        super.writeNBT(nbttagcompound);
+    public void write(NbtCompound nbttagcompound) {
+        super.write(nbttagcompound);
         this.gotRider = this.passenger == null;
-        nbttagcompound.put("GotRider", this.gotRider);
+        nbttagcompound.putBoolean("GotRider", this.gotRider);
     }
 
-    public void readNBT(CompoundTag nbttagcompound) {
-        super.readNBT(nbttagcompound);
+    public void read(NbtCompound nbttagcompound) {
+        super.read(nbttagcompound);
         this.gotRider = nbttagcompound.getBoolean("GotRider");
     }
 
     protected String getHurtSound() {
-        this.world.playSound(this, "step.gravel", 0.6F, 1.0F / (this.rand.nextFloat() * 0.2F + 0.9F));
+        this.world.playSound(this, "step.gravel", 0.6F, 1.0F / (this.random.nextFloat() * 0.2F + 0.9F));
         return "";
     }
 
@@ -124,14 +123,14 @@ public class EntityDirtHorse extends AbstractAnimalEntity implements MobSpawnDat
     }
 
     protected void jump() {
-        this.yVelocity = 0.4;
+        this.velocityY = 0.4;
     }
 
     protected boolean canDespawn() {
         return false;
     }
 
-    public void getDrops() {
+    public void dropItems() {
         Item item1 = ItemListener.horseDoll;
         this.dropItem(item1.id, 1);
     }
@@ -146,34 +145,34 @@ public class EntityDirtHorse extends AbstractAnimalEntity implements MobSpawnDat
             Item item1 = ItemListener.horseDoll;
 
             for (int q = 0; q < 24; ++q) {
-                double a = this.x + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
-                double b = this.y + 0.25 + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
-                double c = this.z + (double) (this.rand.nextFloat() - this.rand.nextFloat()) * 0.125;
+                double a = this.x + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
+                double b = this.y + 0.25 + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
+                double c = this.z + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
                 ClientUtil.addPoofParticle(this.world, a, b, c, item1);
             }
 
-            this.removed = true;
+            this.dead = true;
         }
 
         return fred;
     }
 
-    public void method_925(Entity entity, int i, double d, double d1) {
-        super.method_925(entity, i, d, d1);
+    public void applyKnockback(Entity entity, int i, double d, double d1) {
+        super.applyKnockback(entity, i, d, d1);
         if (entity != null && entity instanceof EntityClayMan) {
-            this.xVelocity *= 0.6;
-            this.yVelocity *= 0.75;
-            this.zVelocity *= 0.6;
+            this.velocityX *= 0.6;
+            this.velocityY *= 0.75;
+            this.velocityZ *= 0.6;
         }
 
     }
 
-    public boolean method_932() {
+    public boolean isOnLadder() {
         return false;
     }
 
     @Override
     public Identifier getHandlerIdentifier() {
-        return Identifier.of(MODID, "dirthorse");
+        return Identifier.of(EntityListener.MOD_ID, "dirthorse");
     }
 }
