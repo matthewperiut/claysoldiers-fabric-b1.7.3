@@ -40,7 +40,7 @@ public class EntityDirtHorse extends AnimalEntity implements MobSpawnDataProvide
         this.movementSpeed = 0.6F;
         this.setBoundingBoxSpacing(0.25F, 0.4F);
         this.setPosition(x, y, z);
-        this.texture = "/claymans/dirtHorse.png";
+        this.texture = "claysoldiers:textures/entities/dirtHorse.png";
         this.renderDistanceMultiplier = 5.0;
         this.world.playSound(this, "step.gravel", 0.8F, ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F) * 0.9F);
     }
