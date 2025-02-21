@@ -26,6 +26,9 @@
     "stationapi:event_bus_client": [
       "com.matthewperiut.claysoldiers.texture.TextureListener",
       "com.matthewperiut.claysoldiers.client.EntityRendererListener"
+    ],
+    "bhcreative:event_bus": [
+      "com.matthewperiut.claysoldiers.optional.BHCreativeSupport"
     ]
   },
   "depends": {

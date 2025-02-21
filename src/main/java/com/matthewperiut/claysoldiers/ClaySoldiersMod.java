@@ -14,17 +14,14 @@ public class ClaySoldiersMod {
     @Entrypoint.Logger
     public static Logger LOGGER = Null.get();
 
-    @Entrypoint.Instance
-    public static ClaySoldiersMod INSTANCE = Null.get();
-
     @Entrypoint.Namespace
     public static Namespace MOD_ID = Null.get();
 
     @EventListener
     public void init(InitEvent event) {
-        ClaySoldiersMod.LOGGER.info("Is this working? " + MOD_ID);
+        ClaySoldiersMod.LOGGER.info("Clay soldiers loaded as: " + MOD_ID);
 
-        if (FabricLoader.getInstance().isModLoaded("spc")) {
+        if (FabricLoader.getInstance().isModLoaded("retrocommands")) {
             RetroCommandsSupport.addEntities();
         }
     }
