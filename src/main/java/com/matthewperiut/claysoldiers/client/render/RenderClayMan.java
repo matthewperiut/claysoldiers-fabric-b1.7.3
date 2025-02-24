@@ -4,12 +4,12 @@ package com.matthewperiut.claysoldiers.client.render;
 
 import com.matthewperiut.claysoldiers.client.model.ModelClayMan;
 import com.matthewperiut.claysoldiers.entity.behavior.EntityClayMan;
-import net.minecraft.client.render.entity.BipedEntityRenderer;
+import net.minecraft.client.render.entity.UndeadEntityRenderer;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.entity.LivingEntity;
 import org.lwjgl.opengl.GL11;
 
-public class RenderClayMan extends BipedEntityRenderer {
+public class RenderClayMan extends UndeadEntityRenderer {
     public ModelClayMan mc1;
 
     public RenderClayMan(BipedEntityModel model, float f) {
@@ -17,7 +17,7 @@ public class RenderClayMan extends BipedEntityRenderer {
         this.mc1 = (ModelClayMan) model;
     }
 
-    protected void method_823(LivingEntity entityliving, float f) {
+    protected void applyScale(LivingEntity entityliving, float f) {
         EntityClayMan c1 = (EntityClayMan) entityliving;
         this.mc1.hasStick = c1.hasStick();
         this.mc1.hasSpecks = c1.hasSpecks();
@@ -30,7 +30,7 @@ public class RenderClayMan extends BipedEntityRenderer {
         this.mc1.hasRocks = c1.hasRocks();
         this.mc1.armLeft = c1.armLeft();
         boolean flag = false;
-        if (c1.method_932()) {
+        if (c1.isOnLadder()) {
             ++c1.climbTime;
             flag = true;
         }

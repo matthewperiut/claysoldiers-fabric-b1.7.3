@@ -1,71 +1,51 @@
 package com.matthewperiut.claysoldiers.client.model;
 
-import net.minecraft.client.model.Cuboid;
+import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.util.math.MathHelper;
 
 public class ModelClayMan extends BipedEntityModel {
-    public Cuboid bipedRightArmor;
 
-    public Cuboid bipedLeftArmor;
+    public ModelPart bipedRightArmor;
+    public ModelPart bipedLeftArmor;
+    public ModelPart bipedChest;
+    public ModelPart bipedRightPadding;
+    public ModelPart bipedLeftPadding;
+    public ModelPart bipedPadding;
 
-    public Cuboid bipedChest;
+    public ModelPart gooBase;
+    public ModelPart logBase;
 
-    public Cuboid bipedRightPadding;
+    public ModelPart bipedRock;
 
-    public Cuboid bipedLeftPadding;
+    public ModelPart speckyHead;
+    public ModelPart speckyBody;
+    public ModelPart speckyRightArm;
+    public ModelPart speckyLeftArm;
+    public ModelPart speckyRightLeg;
+    public ModelPart speckyLeftLeg;
 
-    public Cuboid bipedPadding;
-
-    public Cuboid gooBase;
-
-    public Cuboid logBase;
-
-    public Cuboid bipedRock;
-
-    public Cuboid speckyHead;
-
-    public Cuboid speckyBody;
-
-    public Cuboid speckyRightArm;
-
-    public Cuboid speckyLeftArm;
-
-    public Cuboid speckyRightLeg;
-
-    public Cuboid speckyLeftLeg;
-
-    public Cuboid stick;
-
-    public Cuboid stickBlunt;
-
-    public Cuboid stickSharp;
+    public ModelPart stick;
+    public ModelPart stickBlunt;
+    public ModelPart stickSharp;
 
     public float armLeft;
 
     public boolean hasStick;
-
     public boolean hasArmor;
-
     public boolean hasCrown;
-
     public boolean hasSpecks;
 
     public boolean isClimbing;
-
     public boolean isSharpened;
-
     public boolean isPadded;
-
     public boolean isGooey;
 
     public boolean hasLogs;
-
     public boolean hasRocks;
 
     public ModelClayMan() {
         this(0.0F);
-
     }
 
     public ModelClayMan(float f) {
@@ -77,101 +57,101 @@ public class ModelClayMan extends BipedEntityModel {
         // method_1818 is addCuboid
 
         // field_619 is bipedHead
-        head = new Cuboid(0, 0);
-        head.method_1818(-1.5F, -3.0F, -1.5F, 3, 3, 3, f);
-        head.setRotationPoint(0.0F, 0.0F + f1, 0.0F);
+        head = new ModelPart(0, 0);
+        head.addCuboid(-1.5F, -3.0F, -1.5F, 3, 3, 3, f);
+        head.setPivot(0.0F, 0.0F + f1, 0.0F);
 
         // field_620 is hat
-        hat = new Cuboid(19, 16);
-        hat.method_1818(-1.5F, -4.0F, -1.5F, 3, 2, 3, f + 0.3F);
-        hat.setRotationPoint(0.0F, 0.0F + f1, 0.0F);
+        hat = new ModelPart(19, 16);
+        hat.addCuboid(-1.5F, -4.0F, -1.5F, 3, 2, 3, f + 0.3F);
+        hat.setPivot(0.0F, 0.0F + f1, 0.0F);
 
         // field_621 is body
-        torso = new Cuboid(15, 0);
-        torso.method_1818(-2.0F, 0.0F, -1.0F, 4, 5, 2, f);
-        torso.setRotationPoint(0.0F, 0.0F + f1, 0.0F);
+        body = new ModelPart(15, 0);
+        body.addCuboid(-2.0F, 0.0F, -1.0F, 4, 5, 2, f);
+        body.setPivot(0.0F, 0.0F + f1, 0.0F);
 
         // field_622 is rightArm
-        rightArm = new Cuboid(9, 7);
-        rightArm.method_1818(-1.0F, -1.0F, -1.0F, 2, 6, 2, f);
-        rightArm.setRotationPoint(-3.0F, 1.0F + f1, 0.0F);
+        rightArm = new ModelPart(9, 7);
+        rightArm.addCuboid(-1.0F, -1.0F, -1.0F, 2, 6, 2, f);
+        rightArm.setPivot(-3.0F, 1.0F + f1, 0.0F);
 
         // field_623 is leftArm
-        leftArm = new Cuboid(9, 7);
+        leftArm = new ModelPart(9, 7);
         leftArm.mirror = true;
-        leftArm.method_1818(-1.0F, -1.0F, -1.0F, 2, 6, 2, f);
-        leftArm.setRotationPoint(3.0F, 1.0F + f1, 0.0F);
+        leftArm.addCuboid(-1.0F, -1.0F, -1.0F, 2, 6, 2, f);
+        leftArm.setPivot(3.0F, 1.0F + f1, 0.0F);
 
         // field_624 is rightLeg
-        rightLeg = new Cuboid(0, 7);
-        rightLeg.method_1818(-1.0F, 0.0F, -1.0F, 2, 6, 2, f);
-        rightLeg.setRotationPoint(-1.0F, 5.0F + f1, 0.0F);
+        rightLeg = new ModelPart(0, 7);
+        rightLeg.addCuboid(-1.0F, 0.0F, -1.0F, 2, 6, 2, f);
+        rightLeg.setPivot(-1.0F, 5.0F + f1, 0.0F);
 
         // field_625 is leftLeg
-        leftLeg = new Cuboid(0, 7);
+        leftLeg = new ModelPart(0, 7);
         leftLeg.mirror = true;
-        leftLeg.method_1818(-1.0F, 0.0F, -1.0F, 2, 6, 2, f);
-        leftLeg.setRotationPoint(1.0F, 5.0F + f1, 0.0F);
+        leftLeg.addCuboid(-1.0F, 0.0F, -1.0F, 2, 6, 2, f);
+        leftLeg.setPivot(1.0F, 5.0F + f1, 0.0F);
 
-        this.stick = new Cuboid(31, 11);
-        this.stick.method_1818(-0.5F, 3.5F, -4.0F, 1, 1, 3, f);
-        this.stick.setRotationPoint(-3.0F, 1.0F + f1, 0.0F);
-        this.stickBlunt = new Cuboid(32, 12);
-        this.stickBlunt.method_1818(-0.5F, 3.5F, -6.0F, 1, 1, 2, f);
-        this.stickBlunt.setRotationPoint(-3.0F, 1.0F + f1, 0.0F);
-        this.stickSharp = new Cuboid(9, 0);
-        this.stickSharp.method_1818(-0.5F, 3.5F, -5.5F, 1, 1, 2, f - 0.2F);
-        this.stickSharp.setRotationPoint(-3.0F, 1.0F + f1, 0.0F);
-        this.bipedChest = new Cuboid(0, 21);
-        this.bipedChest.method_1818(-2.0F, 0.0F, -1.0F, 4, 4, 2, f + 0.3F);
-        this.bipedChest.setRotationPoint(0.0F, 0.0F + f1, 0.0F);
-        this.bipedRightArmor = new Cuboid(0, 16);
-        this.bipedRightArmor.method_1818(-1.0F, -1.0F, -1.0F, 2, 2, 2, f + 0.4F);
-        this.bipedRightArmor.setRotationPoint(-3.0F, 1.0F + f1, 0.0F);
-        this.bipedLeftArmor = new Cuboid(0, 16);
+        this.stick = new ModelPart(31, 11);
+        this.stick.addCuboid(-0.5F, 3.5F, -4.0F, 1, 1, 3, f);
+        this.stick.setPivot(-3.0F, 1.0F + f1, 0.0F);
+        this.stickBlunt = new ModelPart(32, 12);
+        this.stickBlunt.addCuboid(-0.5F, 3.5F, -6.0F, 1, 1, 2, f);
+        this.stickBlunt.setPivot(-3.0F, 1.0F + f1, 0.0F);
+        this.stickSharp = new ModelPart(9, 0);
+        this.stickSharp.addCuboid(-0.5F, 3.5F, -5.5F, 1, 1, 2, f - 0.2F);
+        this.stickSharp.setPivot(-3.0F, 1.0F + f1, 0.0F);
+        this.bipedChest = new ModelPart(0, 21);
+        this.bipedChest.addCuboid(-2.0F, 0.0F, -1.0F, 4, 4, 2, f + 0.3F);
+        this.bipedChest.setPivot(0.0F, 0.0F + f1, 0.0F);
+        this.bipedRightArmor = new ModelPart(0, 16);
+        this.bipedRightArmor.addCuboid(-1.0F, -1.0F, -1.0F, 2, 2, 2, f + 0.4F);
+        this.bipedRightArmor.setPivot(-3.0F, 1.0F + f1, 0.0F);
+        this.bipedLeftArmor = new ModelPart(0, 16);
         this.bipedLeftArmor.mirror = true;
-        this.bipedLeftArmor.method_1818(-1.0F, -1.0F, -1.0F, 2, 2, 2, f + 0.4F);
-        this.bipedLeftArmor.setRotationPoint(3.0F, 1.0F + f1, 0.0F);
-        this.bipedPadding = new Cuboid(12, 21);
-        this.bipedPadding.method_1818(-2.0F, 2.9F, -1.0F, 4, 2, 2, f + 0.2F);
-        this.bipedPadding.setRotationPoint(0.0F, 0.0F + f1, 0.0F);
-        this.bipedRightPadding = new Cuboid(9, 16);
-        this.bipedRightPadding.method_1818(-1.0F, -0.1F, -1.0F, 2, 2, 2, f + 0.3F);
-        this.bipedRightPadding.setRotationPoint(-3.0F, 1.0F + f1, 0.0F);
-        this.bipedLeftPadding = new Cuboid(9, 16);
+        this.bipedLeftArmor.addCuboid(-1.0F, -1.0F, -1.0F, 2, 2, 2, f + 0.4F);
+        this.bipedLeftArmor.setPivot(3.0F, 1.0F + f1, 0.0F);
+        this.bipedPadding = new ModelPart(12, 21);
+        this.bipedPadding.addCuboid(-2.0F, 2.9F, -1.0F, 4, 2, 2, f + 0.2F);
+        this.bipedPadding.setPivot(0.0F, 0.0F + f1, 0.0F);
+        this.bipedRightPadding = new ModelPart(9, 16);
+        this.bipedRightPadding.addCuboid(-1.0F, -0.1F, -1.0F, 2, 2, 2, f + 0.3F);
+        this.bipedRightPadding.setPivot(-3.0F, 1.0F + f1, 0.0F);
+        this.bipedLeftPadding = new ModelPart(9, 16);
         this.bipedLeftPadding.mirror = true;
-        this.bipedLeftPadding.method_1818(-1.0F, -0.1F, -1.0F, 2, 2, 2, f + 0.3F);
-        this.bipedLeftPadding.setRotationPoint(3.0F, 1.0F + f1, 0.0F);
-        this.speckyHead = new Cuboid(37, 17);
-        this.speckyHead.method_1818(-1.5F, -3.0F, -1.5F, 3, 3, 3, f + 0.05F);
-        this.speckyHead.setRotationPoint(0.0F, 0.0F + f1, 0.0F);
-        this.speckyBody = new Cuboid(52, 17);
-        this.speckyBody.method_1818(-2.0F, 0.0F, -1.0F, 4, 5, 2, f + 0.05F);
-        this.speckyBody.setRotationPoint(0.0F, 0.0F + f1, 0.0F);
-        this.speckyRightArm = new Cuboid(37, 24);
-        this.speckyRightArm.method_1818(-1.0F, -1.0F, -1.0F, 2, 6, 2, f + 0.05F);
-        this.speckyRightArm.setRotationPoint(-3.0F, 1.0F + f1, 0.0F);
-        this.speckyLeftArm = new Cuboid(46, 24);
+        this.bipedLeftPadding.addCuboid(-1.0F, -0.1F, -1.0F, 2, 2, 2, f + 0.3F);
+        this.bipedLeftPadding.setPivot(3.0F, 1.0F + f1, 0.0F);
+        this.speckyHead = new ModelPart(37, 17);
+        this.speckyHead.addCuboid(-1.5F, -3.0F, -1.5F, 3, 3, 3, f + 0.05F);
+        this.speckyHead.setPivot(0.0F, 0.0F + f1, 0.0F);
+        this.speckyBody = new ModelPart(52, 17);
+        this.speckyBody.addCuboid(-2.0F, 0.0F, -1.0F, 4, 5, 2, f + 0.05F);
+        this.speckyBody.setPivot(0.0F, 0.0F + f1, 0.0F);
+        this.speckyRightArm = new ModelPart(37, 24);
+        this.speckyRightArm.addCuboid(-1.0F, -1.0F, -1.0F, 2, 6, 2, f + 0.05F);
+        this.speckyRightArm.setPivot(-3.0F, 1.0F + f1, 0.0F);
+        this.speckyLeftArm = new ModelPart(46, 24);
         this.speckyLeftArm.mirror = true;
-        this.speckyLeftArm.method_1818(-1.0F, -1.0F, -1.0F, 2, 6, 2, f + 0.05F);
-        this.speckyLeftArm.setRotationPoint(3.0F, 1.0F + f1, 0.0F);
-        this.speckyRightLeg = new Cuboid(46, 24);
-        this.speckyRightLeg.method_1818(-1.0F, 0.0F, -1.0F, 2, 6, 2, f + 0.05F);
-        this.speckyRightLeg.setRotationPoint(-1.0F, 5.0F + f1, 0.0F);
-        this.speckyLeftLeg = new Cuboid(37, 24);
+        this.speckyLeftArm.addCuboid(-1.0F, -1.0F, -1.0F, 2, 6, 2, f + 0.05F);
+        this.speckyLeftArm.setPivot(3.0F, 1.0F + f1, 0.0F);
+        this.speckyRightLeg = new ModelPart(46, 24);
+        this.speckyRightLeg.addCuboid(-1.0F, 0.0F, -1.0F, 2, 6, 2, f + 0.05F);
+        this.speckyRightLeg.setPivot(-1.0F, 5.0F + f1, 0.0F);
+        this.speckyLeftLeg = new ModelPart(37, 24);
         this.speckyLeftLeg.mirror = true;
-        this.speckyLeftLeg.method_1818(-1.0F, 0.0F, -1.0F, 2, 6, 2, f + 0.05F);
-        this.speckyLeftLeg.setRotationPoint(1.0F, 5.0F + f1, 0.0F);
-        this.gooBase = new Cuboid(0, 27);
-        this.gooBase.method_1818(-2.5F, 9.0F, -1.5F, 5, 2, 3, f);
-        this.gooBase.setRotationPoint(0.0F, 0.0F + f1, 0.0F);
-        this.logBase = new Cuboid(16, 26);
-        this.logBase.method_1818(-2.5F, -6.5F, -1.5F, 5, 3, 3, f);
-        this.logBase.setRotationPoint(0.0F, 0.0F + f1, 0.0F);
-        this.bipedRock = new Cuboid(31, 3);
+        this.speckyLeftLeg.addCuboid(-1.0F, 0.0F, -1.0F, 2, 6, 2, f + 0.05F);
+        this.speckyLeftLeg.setPivot(1.0F, 5.0F + f1, 0.0F);
+        this.gooBase = new ModelPart(0, 27);
+        this.gooBase.addCuboid(-2.5F, 9.0F, -1.5F, 5, 2, 3, f);
+        this.gooBase.setPivot(0.0F, 0.0F + f1, 0.0F);
+        this.logBase = new ModelPart(16, 26);
+        this.logBase.addCuboid(-2.5F, -6.5F, -1.5F, 5, 3, 3, f);
+        this.logBase.setPivot(0.0F, 0.0F + f1, 0.0F);
+        this.bipedRock = new ModelPart(31, 3);
         this.bipedRock.mirror = true;
-        this.bipedRock.method_1818(-1.0F, 3.5F, -1.0F, 2, 2, 2, f + 0.375F);
-        this.bipedRock.setRotationPoint(3.0F, 1.0F + f1, 0.0F);
+        this.bipedRock.addCuboid(-1.0F, 3.5F, -1.0F, 2, 2, 2, f + 0.375F);
+        this.bipedRock.setPivot(3.0F, 1.0F + f1, 0.0F);
     }
 
     @Override
@@ -181,7 +161,7 @@ public class ModelClayMan extends BipedEntityModel {
         // head.render
         this.head.render(f5);
         // body.render
-        this.torso.render(f5);
+        this.body.render(f5);
         // rightarm.render
         this.rightArm.render(f5);
         // leftarm.render
@@ -241,8 +221,8 @@ public class ModelClayMan extends BipedEntityModel {
         this.leftLeg.pitch = MathHelper.cos(f * 0.6662F + 3.141593F) * 1.4F * f1;
         this.rightLeg.yaw = 0.0F;
         this.leftLeg.yaw = 0.0F;
-        Cuboid var10000;
-        if (this.isRiding) {
+        ModelPart var10000;
+        if (this.riding) {
             var10000 = this.rightArm;
             var10000.pitch += -0.6283185F;
             var10000 = this.leftArm;
@@ -253,11 +233,11 @@ public class ModelClayMan extends BipedEntityModel {
             this.leftLeg.yaw = -0.3141593F;
         }
 
-        if (this.swingingLeft) {
+        if (this.leftArmPose) {
             this.leftArm.pitch = this.leftArm.pitch * 0.5F - 0.3141593F;
         }
 
-        if (this.swingingRight) {
+        if (this.rightArmPose) {
             this.rightArm.pitch = this.rightArm.pitch * 0.5F - 0.3141593F;
         }
 
@@ -267,13 +247,13 @@ public class ModelClayMan extends BipedEntityModel {
         float f7;
         if (this.handSwingProgress > -9990.0F) {
             f6 = this.handSwingProgress;
-            this.torso.yaw = MathHelper.sin(MathHelper.sqrt(f6) * 3.141593F * 2.0F) * 0.2F;
+            this.body.yaw = MathHelper.sin(MathHelper.sqrt(f6) * 3.141593F * 2.0F) * 0.2F;
             var10000 = this.rightArm;
-            var10000.yaw += this.torso.yaw;
+            var10000.yaw += this.body.yaw;
             var10000 = this.leftArm;
-            var10000.yaw += this.torso.yaw;
+            var10000.yaw += this.body.yaw;
             var10000 = this.leftArm;
-            var10000.pitch += this.torso.yaw;
+            var10000.pitch += this.body.yaw;
             f6 = 1.0F - this.handSwingProgress;
             f6 *= f6;
             f6 *= f6;
@@ -283,7 +263,7 @@ public class ModelClayMan extends BipedEntityModel {
             var10000 = this.rightArm;
             var10000.pitch = (float) ((double) var10000.pitch - ((double) f7 * 1.2 + (double) f8));
             var10000 = this.rightArm;
-            var10000.yaw += this.torso.yaw * 2.0F;
+            var10000.yaw += this.body.yaw * 2.0F;
             this.rightArm.roll = MathHelper.sin(this.handSwingProgress * 3.141593F) * -0.4F;
         }
 
@@ -318,7 +298,7 @@ public class ModelClayMan extends BipedEntityModel {
 
         this.speckyHead.pitch = this.head.pitch;
         this.speckyHead.yaw = this.head.yaw;
-        this.bipedPadding.yaw = this.bipedChest.yaw = this.speckyBody.yaw = this.torso.yaw;
+        this.bipedPadding.yaw = this.bipedChest.yaw = this.speckyBody.yaw = this.body.yaw;
         this.stickBlunt.pitch = this.stickSharp.pitch = this.stick.pitch = this.bipedRightPadding.pitch = this.bipedRightArmor.pitch = this.speckyRightArm.pitch = this.rightArm.pitch;
         this.stickBlunt.yaw = this.stickSharp.yaw = this.stick.yaw = this.bipedRightPadding.yaw = this.bipedRightArmor.yaw = this.speckyRightArm.yaw = this.rightArm.yaw;
         this.stickBlunt.roll = this.stickSharp.roll = this.stick.roll = this.bipedRightPadding.roll = this.bipedRightArmor.roll = this.speckyRightArm.roll = this.rightArm.roll;

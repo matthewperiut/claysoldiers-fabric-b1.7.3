@@ -10,8 +10,9 @@ import net.modificationstation.stationapi.api.util.Null;
 
 public class ItemListener {
     @Entrypoint.Namespace
-    public static final Namespace MOD_ID = Null.get();
+    public static Namespace MOD_ID = Null.get();
 
+    public static Item[] items;
     public static Item
             clayDisruptor,
             greyDoll,
@@ -36,5 +37,17 @@ public class ItemListener {
         purpleDoll = new ItemClayMan(Identifier.of(MOD_ID, "purpledoll"), 6).setTranslationKey(MOD_ID, "purpledoll");
 
         horseDoll = new ItemDirtHorse(Identifier.of(MOD_ID, "horsedoll")).setTranslationKey(MOD_ID, "horsedoll");
+
+        items = new Item[]{
+                ItemListener.clayDisruptor,
+                ItemListener.greyDoll,
+                ItemListener.redDoll,
+                ItemListener.yellowDoll,
+                ItemListener.greenDoll,
+                ItemListener.blueDoll,
+                ItemListener.orangeDoll,
+                ItemListener.purpleDoll,
+                ItemListener.horseDoll,
+        };
     }
 }

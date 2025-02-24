@@ -1,6 +1,6 @@
 package com.matthewperiut.claysoldiers;
 
-import com.matthewperiut.claysoldiers.optional.SPCSupport;
+import com.matthewperiut.claysoldiers.optional.RetroCommandsSupport;
 import net.fabricmc.loader.api.FabricLoader;
 import net.mine_diver.unsafeevents.listener.EventListener;
 import net.modificationstation.stationapi.api.event.mod.InitEvent;
@@ -12,20 +12,17 @@ import org.apache.logging.log4j.Logger;
 public class ClaySoldiersMod {
 
     @Entrypoint.Logger
-    public static final Logger LOGGER = Null.get();
-
-    @Entrypoint.Instance
-    public static final ClaySoldiersMod INSTANCE = Null.get();
+    public static Logger LOGGER = Null.get();
 
     @Entrypoint.Namespace
-    public static final Namespace MODID = Null.get();
+    public static Namespace MOD_ID = Null.get();
 
     @EventListener
     public void init(InitEvent event) {
-        ClaySoldiersMod.LOGGER.info("Is this working? " + MODID);
+        ClaySoldiersMod.LOGGER.info("Clay soldiers loaded as: " + MOD_ID);
 
-        if (FabricLoader.getInstance().isModLoaded("spc")) {
-            SPCSupport.addEntities();
+        if (FabricLoader.getInstance().isModLoaded("retrocommands")) {
+            RetroCommandsSupport.addEntities();
         }
     }
 }

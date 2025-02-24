@@ -26,10 +26,19 @@
     "stationapi:event_bus_client": [
       "com.matthewperiut.claysoldiers.texture.TextureListener",
       "com.matthewperiut.claysoldiers.client.EntityRendererListener"
+    ],
+    "bhcreative:event_bus": [
+      "com.matthewperiut.claysoldiers.optional.BHCreativeSupport"
     ]
   },
+
   "depends": {
     "fabricloader": ">=0.13.3",
-    "minecraft": "1.0.0-beta.7.3"
+    "minecraft": "1.0.0-beta.7.3",
+    "stationapi": ">=2.0.0-alpha.3"
+  },
+
+  "recommends": {
+    "modmenu": "*"
   }
 }

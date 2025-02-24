@@ -17,27 +17,27 @@ import java.util.List;
 public class ItemClayDisruptor extends TemplateItem {
     public ItemClayDisruptor(Identifier id) {
         super(id);
-        this.setDurability(16);
-        this.setMaxStackSize(1);
+        this.setMaxDamage(16);
+        this.setMaxCount(1);
     }
 
     @Override
-    public boolean shouldSpinWhenRendering() {
+    public boolean isHandheldRod() {
         return true;
     }
 
     public ItemStack use(ItemStack itemstack, World world, PlayerEntity entityplayer) {
-        if (itemstack.cooldown == 0) {
+        if (itemstack.bobbingAnimationTime == 0) {
             boolean used = false;
             List list1 = world.getEntities(entityplayer, entityplayer.boundingBox.expand(16.0D, 16.0D, 16.0D));
 
             int x;
             for (x = 0; x < list1.size(); ++x) {
                 Entity entity1 = (Entity) list1.get(x);
-                if (entity1 instanceof EntityClayMan && !entity1.removed && ((LivingEntity) entity1).health > 0) {
+                if (entity1 instanceof EntityClayMan && !entity1.dead && ((LivingEntity) entity1).health > 0) {
                     entity1.damage(entityplayer, 100);
                     used = true;
-                } else if (entity1 instanceof EntityDirtHorse && !entity1.removed && ((LivingEntity) entity1).health > 0) {
+                } else if (entity1 instanceof EntityDirtHorse && !entity1.dead && ((LivingEntity) entity1).health > 0) {
                     entity1.damage(entityplayer, 100);
                     used = true;
                 }
@@ -68,8 +68,8 @@ public class ItemClayDisruptor extends TemplateItem {
             }
 
             if (used) {
-                itemstack.applyDamage(1, entityplayer);
-                itemstack.cooldown = 10;
+                itemstack.damage(1, entityplayer);
+                itemstack.bobbingAnimationTime = 10;
             }
         }
 
@@ -80,9 +80,9 @@ public class ItemClayDisruptor extends TemplateItem {
         int a = worldObj.getBlockId(x, y, z);
         int b = worldObj.getBlockMeta(x, y, z);
         if (a != 0) {
-            Block.BY_ID[a].onBlockRemoved(worldObj, x, y, z);
-            worldObj.playSound(x, y, z, "step.gravel", 0.8F, ((rand.nextFloat() - rand.nextFloat()) * 0.2F + 1.0F) * 0.9F);
-            Block.BY_ID[a].drop(worldObj, x, y, z, b);
+            Block.BLOCKS[a].onBreak(worldObj, x, y, z);
+            worldObj.playSound(x, y, z, "step.gravel", 0.8F, ((random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F) * 0.9F);
+            Block.BLOCKS[a].dropStacks(worldObj, x, y, z, b);
             worldObj.setBlock(x, y, z, 0);
         }
     }
