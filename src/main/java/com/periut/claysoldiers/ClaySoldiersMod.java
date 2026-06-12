@@ -1,28 +1,32 @@
 package com.periut.claysoldiers;
 
+import com.periut.claysoldiers.entity.ClaySoldierEntities;
+import com.periut.claysoldiers.item.ClaySoldierItems;
 import com.periut.claysoldiers.optional.RetroCommandsSupport;
+import com.periut.claysoldiers.recipe.ClaySoldierRecipes;
 import net.fabricmc.loader.api.FabricLoader;
-import net.mine_diver.unsafeevents.listener.EventListener;
-import net.modificationstation.stationapi.api.event.mod.InitEvent;
-import net.modificationstation.stationapi.api.mod.entrypoint.Entrypoint;
-import net.modificationstation.stationapi.api.util.Namespace;
-import net.modificationstation.stationapi.api.util.Null;
+import net.ornithemc.osl.core.api.util.NamespacedIdentifier;
+import net.ornithemc.osl.core.api.util.NamespacedIdentifiers;
+import net.ornithemc.osl.entrypoints.api.ModInitializer;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class ClaySoldiersMod {
+public class ClaySoldiersMod implements ModInitializer {
+	public static final String MOD_ID = "claysoldiers";
+	public static final Logger LOGGER = LogManager.getLogger("Clay Soldiers");
 
-    @Entrypoint.Logger
-    public static Logger LOGGER = Null.get();
+	public static NamespacedIdentifier id(String name) {
+		return NamespacedIdentifiers.from(MOD_ID, name);
+	}
 
-    @Entrypoint.Namespace
-    public static Namespace MOD_ID = Null.get();
+	@Override
+	public void init() {
+		ClaySoldierItems.registerItems();
+		ClaySoldierRecipes.registerRecipes();
+		ClaySoldierEntities.registerEntities();
 
-    @EventListener
-    public void init(InitEvent event) {
-        ClaySoldiersMod.LOGGER.info("Clay soldiers loaded as: " + MOD_ID);
-
-        if (FabricLoader.getInstance().isModLoaded("retrocommands")) {
-            RetroCommandsSupport.addEntities();
-        }
-    }
+		if (FabricLoader.getInstance().isModLoaded("retrocommands")) {
+			RetroCommandsSupport.addEntities();
+		}
+	}
 }

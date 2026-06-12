@@ -3,15 +3,14 @@ package com.periut.claysoldiers.item;
 import com.periut.claysoldiers.entity.behavior.EntityClayMan;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import net.modificationstation.stationapi.api.template.item.TemplateItem;
-import net.modificationstation.stationapi.api.util.Identifier;
 
-public class ItemClayMan extends TemplateItem {
+public class ItemClayMan extends Item {
     public int clayTeam;
 
-    public ItemClayMan(Identifier id, int j) {
+    public ItemClayMan(int id, int j) {
         super(id);
         this.clayTeam = j;
         this.maxCount = 16;

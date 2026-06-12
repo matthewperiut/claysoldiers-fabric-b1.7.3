@@ -6,17 +6,16 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.modificationstation.stationapi.api.template.item.TemplateItem;
-import net.modificationstation.stationapi.api.util.Identifier;
 
 import java.util.List;
 
-public class ItemClayDisruptor extends TemplateItem {
-    public ItemClayDisruptor(Identifier id) {
-        super(id);
+public class ItemClayDisruptor extends Item {
+    public ItemClayDisruptor(int id) {
+		super(id);
         this.setMaxDamage(16);
         this.setMaxCount(1);
     }

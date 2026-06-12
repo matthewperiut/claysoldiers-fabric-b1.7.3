@@ -1,8 +1,10 @@
 package com.periut.claysoldiers.entity.behavior;
 
-import com.periut.claysoldiers.entity.EntityListener;
-import com.periut.claysoldiers.item.ItemListener;
+import com.periut.claysoldiers.ClaySoldiersMod;
+import com.periut.claysoldiers.entity.ClaySoldierEntities;
+import com.periut.claysoldiers.item.ClaySoldierItems;
 import com.periut.claysoldiers.util.ClientUtil;
+import com.periut.retroapi.entity.spawn.RetroSpawnDataProvider;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.AnimalEntity;
@@ -10,15 +12,13 @@ import net.minecraft.item.Item;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.modificationstation.stationapi.api.server.entity.HasTrackingParameters;
-import net.modificationstation.stationapi.api.server.entity.MobSpawnDataProvider;
-import net.modificationstation.stationapi.api.util.Identifier;
+import net.ornithemc.osl.core.api.util.NamespacedIdentifier;
 
 import java.util.List;
 
-@HasTrackingParameters(trackingDistance = 160, updatePeriod = 2)
-public class EntityDirtHorse extends AnimalEntity implements MobSpawnDataProvider {
-    public boolean gotRider;
+public class EntityDirtHorse extends AnimalEntity implements RetroSpawnDataProvider {
+	public static final NamespacedIdentifier ID = ClaySoldiersMod.id("dirthorse");
+	public boolean gotRider;
 
     public EntityDirtHorse(World world) {
         super(world);
@@ -28,7 +28,7 @@ public class EntityDirtHorse extends AnimalEntity implements MobSpawnDataProvide
         this.movementSpeed = 0.6F;
         this.setBoundingBoxSpacing(0.25F, 0.4F);
         this.setPosition(this.x, this.y, this.z);
-        this.texture = "claysoldiers:textures/entities/dirtHorse.png";
+        this.texture = "/assets/claysoldiers/textures/mobs/dirtHorse.png";
         this.renderDistanceMultiplier = 5.0D;
     }
 
@@ -40,7 +40,7 @@ public class EntityDirtHorse extends AnimalEntity implements MobSpawnDataProvide
         this.movementSpeed = 0.6F;
         this.setBoundingBoxSpacing(0.25F, 0.4F);
         this.setPosition(x, y, z);
-        this.texture = "claysoldiers:textures/entities/dirtHorse.png";
+        this.texture = "/assets/claysoldiers/textures/mobs/dirtHorse.png";
         this.renderDistanceMultiplier = 5.0;
         this.world.playSound(this, "step.gravel", 0.8F, ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F) * 0.9F);
     }
@@ -131,7 +131,7 @@ public class EntityDirtHorse extends AnimalEntity implements MobSpawnDataProvide
     }
 
     public void dropItems() {
-        Item item1 = ItemListener.horseDoll;
+        Item item1 = ClaySoldierItems.horseDoll;
         this.dropItem(item1.id, 1);
     }
 
@@ -142,7 +142,7 @@ public class EntityDirtHorse extends AnimalEntity implements MobSpawnDataProvide
 
         boolean fred = super.damage(e, i);
         if (fred && this.health <= 0) {
-            Item item1 = ItemListener.horseDoll;
+            Item item1 = ClaySoldierItems.horseDoll;
 
             for (int q = 0; q < 24; ++q) {
                 double a = this.x + (double) (this.random.nextFloat() - this.random.nextFloat()) * 0.125;
@@ -171,8 +171,8 @@ public class EntityDirtHorse extends AnimalEntity implements MobSpawnDataProvide
         return false;
     }
 
-    @Override
-    public Identifier getHandlerIdentifier() {
-        return Identifier.of(EntityListener.MOD_ID, "dirthorse");
-    }
+	@Override
+	public NamespacedIdentifier getHandlerId() {
+		return ID;
+	}
 }

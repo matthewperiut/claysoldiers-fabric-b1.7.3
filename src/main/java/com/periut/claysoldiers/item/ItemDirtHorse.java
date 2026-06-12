@@ -2,11 +2,10 @@ package com.periut.claysoldiers.item;
 
 import com.periut.claysoldiers.entity.behavior.EntityDirtHorse;
 import net.minecraft.world.World;
-import net.modificationstation.stationapi.api.util.Identifier;
 
 public class ItemDirtHorse extends ItemClayMan {
-    public ItemDirtHorse(Identifier identifier) {
-        super(identifier, -1);
+    public ItemDirtHorse(int id) {
+        super(id, -1);
         this.setMaxCount(8);
     }
 

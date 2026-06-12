@@ -1,7 +1,9 @@
 package com.periut.claysoldiers.entity.behavior;
 
-import com.periut.claysoldiers.entity.EntityListener;
+import com.periut.claysoldiers.ClaySoldiersMod;
+import com.periut.claysoldiers.entity.ClaySoldierEntities;
 import com.periut.claysoldiers.util.ClientUtil;
+import com.periut.retroapi.entity.spawn.RetroSpawnDataProvider;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -14,14 +16,13 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.modificationstation.stationapi.api.server.entity.HasTrackingParameters;
-import net.modificationstation.stationapi.api.server.entity.MobSpawnDataProvider;
-import net.modificationstation.stationapi.api.util.Identifier;
+import net.ornithemc.osl.core.api.util.NamespacedIdentifier;
 
 import java.util.List;
 
-@HasTrackingParameters(trackingDistance = 160, updatePeriod = 2)
-public class EntityGravelChunk extends Entity implements MobSpawnDataProvider {
+public class EntityGravelChunk extends LivingEntity implements RetroSpawnDataProvider {
+	public static final NamespacedIdentifier ID = ClaySoldiersMod.id("gravelchunk");
+
     private int xTile = -1;
     private int yTile = -1;
     private int zTile = -1;
@@ -312,8 +313,8 @@ public class EntityGravelChunk extends Entity implements MobSpawnDataProvider {
         return 0.0F;
     }
 
-    @Override
-    public Identifier getHandlerIdentifier() {
-        return Identifier.of(EntityListener.MOD_ID, "gravelchunk");
-    }
+	@Override
+	public NamespacedIdentifier getHandlerId() {
+		return ID;
+	}
 }

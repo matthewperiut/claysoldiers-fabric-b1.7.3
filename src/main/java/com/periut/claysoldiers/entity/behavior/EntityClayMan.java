@@ -1,9 +1,10 @@
 package com.periut.claysoldiers.entity.behavior;
 
-import com.periut.claysoldiers.entity.EntityListener;
+import com.periut.claysoldiers.ClaySoldiersMod;
 import com.periut.claysoldiers.item.ItemClayMan;
-import com.periut.claysoldiers.item.ItemListener;
+import com.periut.claysoldiers.item.ClaySoldierItems;
 import com.periut.claysoldiers.util.ClientUtil;
+import com.periut.retroapi.entity.spawn.RetroMobSpawnData;
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.ChestBlockEntity;
@@ -20,17 +21,16 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.modificationstation.stationapi.api.network.packet.MessagePacket;
-import net.modificationstation.stationapi.api.server.entity.HasTrackingParameters;
-import net.modificationstation.stationapi.api.server.entity.MobSpawnDataProvider;
-import net.modificationstation.stationapi.api.util.Identifier;
+import net.ornithemc.osl.core.api.util.NamespacedIdentifier;
+import net.ornithemc.osl.networking.api.PacketBuffer;
 
-import java.util.Arrays;
+import java.io.IOException;
 import java.util.List;
 
-@HasTrackingParameters(trackingDistance = 160, updatePeriod = 2)
-public class EntityClayMan extends AnimalEntity implements MobSpawnDataProvider {
-    public int clayTeam;
+public class EntityClayMan extends AnimalEntity implements RetroMobSpawnData {
+	public static final NamespacedIdentifier ID = ClaySoldiersMod.id("claysoldier");
+
+	public int clayTeam;
     public int weaponPoints;
     public int armorPoints;
     public int foodLeft;
@@ -89,7 +89,7 @@ public class EntityClayMan extends AnimalEntity implements MobSpawnDataProvider 
     }
 
     public String clayManTexture(int i) {
-        String joe = "claysoldiers:textures/entities/clay";
+        String joe = "/assets/claysoldiers/textures/mobs/clay";
         if (i == 0) {
             joe = joe + "Grey";
         } else if (i == 1) {
@@ -507,19 +507,19 @@ public class EntityClayMan extends AnimalEntity implements MobSpawnDataProvider 
                                 } else if (stack.getItem() != null && stack.getItem() instanceof ItemClayMan) {
                                     this.swingArm();
                                     this.world.playSound(item, "step.gravel", 0.8F, ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F) * 0.9F);
-                                    Item item1 = ItemListener.greyDoll.asItem();
+                                    Item item1 = Item.ITEMS[ClaySoldierItems.greyDoll.id];
                                     if (this.clayTeam == 1) {
-                                        item1 = ItemListener.redDoll.asItem();
+                                        item1 = Item.ITEMS[ClaySoldierItems.redDoll.id];
                                     } else if (this.clayTeam == 2) {
-                                        item1 = ItemListener.yellowDoll.asItem();
+                                        item1 = Item.ITEMS[ClaySoldierItems.yellowDoll.id];
                                     } else if (this.clayTeam == 3) {
-                                        item1 = ItemListener.greenDoll.asItem();
+                                        item1 = Item.ITEMS[ClaySoldierItems.greenDoll.id];
                                     } else if (this.clayTeam == 4) {
-                                        item1 = ItemListener.blueDoll.asItem();
+                                        item1 = Item.ITEMS[ClaySoldierItems.blueDoll.id];
                                     } else if (this.clayTeam == 5) {
-                                        item1 = ItemListener.orangeDoll.asItem();
+                                        item1 = Item.ITEMS[ClaySoldierItems.orangeDoll.id];
                                     } else if (this.clayTeam == 6) {
-                                        item1 = ItemListener.purpleDoll.asItem();
+                                        item1 = Item.ITEMS[ClaySoldierItems.purpleDoll.id];
                                     }
 
                                     // todo:
@@ -889,19 +889,19 @@ public class EntityClayMan extends AnimalEntity implements MobSpawnDataProvider 
                                 if (ic.clayTeam == this.clayTeam) {
                                     if (arrived) {
                                         this.swingArm();
-                                        Item item1 = ItemListener.greyDoll.asItem();
+                                        Item item1 = Item.ITEMS[ClaySoldierItems.greyDoll.id];
                                         if (this.clayTeam == 1) {
-                                            item1 = ItemListener.redDoll.asItem();
+                                            item1 = Item.ITEMS[ClaySoldierItems.redDoll.id];
                                         } else if (this.clayTeam == 2) {
-                                            item1 = ItemListener.yellowDoll.asItem();
+                                            item1 = Item.ITEMS[ClaySoldierItems.yellowDoll.id];
                                         } else if (this.clayTeam == 3) {
-                                            item1 = ItemListener.greenDoll.asItem();
+                                            item1 = Item.ITEMS[ClaySoldierItems.greenDoll.id];
                                         } else if (this.clayTeam == 4) {
-                                            item1 = ItemListener.blueDoll.asItem();
+                                            item1 = Item.ITEMS[ClaySoldierItems.blueDoll.id];
                                         } else if (this.clayTeam == 5) {
-                                            item1 = ItemListener.orangeDoll.asItem();
+                                            item1 = Item.ITEMS[ClaySoldierItems.orangeDoll.id];
                                         } else if (this.clayTeam == 6) {
-                                            item1 = ItemListener.purpleDoll.asItem();
+                                            item1 = Item.ITEMS[ClaySoldierItems.purpleDoll.id];
                                         }
 
                                         for (u = 0; u < 18; ++u) {
@@ -1402,19 +1402,19 @@ public class EntityClayMan extends AnimalEntity implements MobSpawnDataProvider 
 
     public void dropItems() {
         if (!this.gunpowdered) {
-            Item item1 = ItemListener.greyDoll.asItem();
+            Item item1 = Item.ITEMS[ClaySoldierItems.greyDoll.id];
             if (this.clayTeam == 1) {
-                item1 = ItemListener.redDoll.asItem();
+                item1 = Item.ITEMS[ClaySoldierItems.redDoll.id];
             } else if (this.clayTeam == 2) {
-                item1 = ItemListener.yellowDoll.asItem();
+                item1 = Item.ITEMS[ClaySoldierItems.yellowDoll.id];
             } else if (this.clayTeam == 3) {
-                item1 = ItemListener.greenDoll.asItem();
+                item1 = Item.ITEMS[ClaySoldierItems.greenDoll.id];
             } else if (this.clayTeam == 4) {
-                item1 = ItemListener.blueDoll.asItem();
+                item1 = Item.ITEMS[ClaySoldierItems.blueDoll.id];
             } else if (this.clayTeam == 5) {
-                item1 = ItemListener.orangeDoll.asItem();
+                item1 = Item.ITEMS[ClaySoldierItems.orangeDoll.id];
             } else if (this.clayTeam == 6) {
-                item1 = ItemListener.purpleDoll.asItem();
+                item1 = Item.ITEMS[ClaySoldierItems.purpleDoll.id];
             }
 
             this.dropItem(item1.id, 1);
@@ -1547,19 +1547,19 @@ public class EntityClayMan extends AnimalEntity implements MobSpawnDataProvider 
 
             boolean fred = super.damage(e, i);
             if (fred && this.health <= 0) {
-                Item item1 = ItemListener.greyDoll.asItem();
+                Item item1 = Item.ITEMS[ClaySoldierItems.greyDoll.id];
                 if (this.clayTeam == 1) {
-                    item1 = ItemListener.redDoll.asItem();
+                    item1 = Item.ITEMS[ClaySoldierItems.redDoll.id];
                 } else if (this.clayTeam == 2) {
-                    item1 = ItemListener.yellowDoll.asItem();
+                    item1 = Item.ITEMS[ClaySoldierItems.yellowDoll.id];
                 } else if (this.clayTeam == 3) {
-                    item1 = ItemListener.greenDoll.asItem();
+                    item1 = Item.ITEMS[ClaySoldierItems.greenDoll.id];
                 } else if (this.clayTeam == 4) {
-                    item1 = ItemListener.blueDoll.asItem();
+                    item1 = Item.ITEMS[ClaySoldierItems.blueDoll.id];
                 } else if (this.clayTeam == 5) {
-                    item1 = ItemListener.orangeDoll.asItem();
+                    item1 = Item.ITEMS[ClaySoldierItems.orangeDoll.id];
                 } else if (this.clayTeam == 6) {
-                    item1 = ItemListener.purpleDoll.asItem();
+                    item1 = Item.ITEMS[ClaySoldierItems.purpleDoll.id];
                 }
 
                 for (int q = 0; q < 24; ++q) {
@@ -1643,22 +1643,19 @@ public class EntityClayMan extends AnimalEntity implements MobSpawnDataProvider 
         fallDistance = f;
     }
 
-    @Override
-    public Identifier getHandlerIdentifier() {
-        return Identifier.of(EntityListener.MOD_ID, "claysoldier");
-    }
+	@Override
+	public NamespacedIdentifier getHandlerId() {
+		return ID;
+	}
 
-    @Override
-    public void writeToMessage(MessagePacket message) {
-        // message.ints.length is 4, so let's add a fifth
-        int[] newInts = Arrays.copyOf(message.ints, message.ints.length + 1);
-        newInts[newInts.length - 1] = clayTeam;
-        message.ints = newInts;
-    }
+	@Override
+	public void writeExtra(PacketBuffer buf) throws IOException {
+		buf.writeInt(clayTeam);
+	}
 
-    @Override
-    public void readFromMessage(MessagePacket message) {
-        clayTeam = message.ints[4];
-        this.texture = clayManTexture(clayTeam);
-    }
+	@Override
+	public void readExtra(PacketBuffer buf) throws IOException {
+		clayTeam = buf.readInt();
+		this.texture = clayManTexture(clayTeam);
+	}
 }

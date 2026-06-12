@@ -5,7 +5,7 @@
   "name": "Clay Soldiers Mod",
   "description": "Clay Soldiers V3 reimplemented in STAPI",
   "authors": [
-    "periut",
+    "Slainlight",
     "KodaichiZero"
   ],
   "contact": {
@@ -13,32 +13,21 @@
     "sources": "https://github.com/periut/claysoldiers-fabric-b1.7.3",
     "issues": "https://github.com/periut/claysoldiers-fabric-b1.7.3/issues"
   },
-  "license": "CC0-1.0",
-  "icon": "assets/claysoldiers/icon.png",
-  "environment": "*",
-  "entrypoints": {
-    "stationapi:event_bus": [
-      "com.periut.claysoldiers.ClaySoldiersMod",
-      "com.periut.claysoldiers.item.ItemListener",
-      "com.periut.claysoldiers.recipe.RecipeListener",
-      "com.periut.claysoldiers.entity.EntityListener"
-    ],
-    "stationapi:event_bus_client": [
-      "com.periut.claysoldiers.texture.TextureListener",
-      "com.periut.claysoldiers.client.EntityRendererListener"
-    ],
-    "bhcreative:event_bus": [
-      "com.periut.claysoldiers.optional.BHCreativeSupport"
+	"license": "MIT",
+	"icon": "assets/claysoldiers/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"init": [
+			"com.periut.claysoldiers.ClaySoldiersMod"
+		],
+    "client-init": [
+      "com.periut.claysoldiers.ClaySoldiersModClient"
     ]
-  },
-
-  "depends": {
-    "fabricloader": ">=0.13.3",
-    "minecraft": "1.0.0-beta.7.3",
-    "stationapi": ">=2.0.0-alpha.3"
-  },
-
-  "recommends": {
-    "modmenu": "*"
-  }
+	},
+	"depends": {
+		"fabricloader": ">=0.17.3",
+		"minecraft": "1.0.0-beta.7.3",
+		"retroapi": ">=0.2.0",
+		"osl-entrypoints": ">=0.4.0"
+	}
 }
